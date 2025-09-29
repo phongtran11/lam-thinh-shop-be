@@ -21,6 +21,7 @@ export class TokenService {
     return {
       accessToken,
       refreshToken,
+      expiresIn: this.getAccessTokenExpirationDate(),
     };
   }
 
@@ -42,5 +43,25 @@ export class TokenService {
         infer: true,
       }),
     });
+  }
+
+  getRefreshTokenExpirationDate(): Date {
+    const expiresIn = this.configService.getOrThrow('refreshJwt.expiredIn', {
+      infer: true,
+    });
+
+    const expirationDate = new Date();
+    expirationDate.setSeconds(expirationDate.getSeconds() + expiresIn);
+    return expirationDate;
+  }
+
+  getAccessTokenExpirationDate(): Date {
+    const expiresIn = this.configService.getOrThrow('jwt.expiredIn', {
+      infer: true,
+    });
+
+    const expirationDate = new Date();
+    expirationDate.setSeconds(expirationDate.getSeconds() + expiresIn);
+    return expirationDate;
   }
 }

@@ -1,7 +1,5 @@
-
 import {
   registerDecorator,
-  ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -27,7 +25,7 @@ export class IsVNPhoneNumberConstraint implements ValidatorConstraintInterface {
     return vietnamesePhoneNumberRegex.test(phone);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return '$property must be a valid Vietnamese phone number';
   }
 }

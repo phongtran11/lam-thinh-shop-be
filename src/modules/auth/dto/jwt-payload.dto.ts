@@ -7,4 +7,7 @@ export class JwtPayload {
 
   @Expose()
   email: string;
+
+  @Expose()
+  roleName: string;
 }

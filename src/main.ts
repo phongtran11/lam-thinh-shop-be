@@ -4,7 +4,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
-import { BadRequestResponseDto } from './shared/dto/response.dto';
 import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
 
 async function bootstrap() {

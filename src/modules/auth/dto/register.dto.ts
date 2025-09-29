@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsVNPhoneNumber } from 'src/shared/decorators/is-vn-phone-number.decorator';
 import { Match } from 'src/shared/decorators/match.decorator';
 import { Trim } from 'src/shared/decorators/trim.decorator';
 
@@ -64,13 +59,11 @@ export class RegisterDto {
   lastName: string;
 
   @ApiProperty({
-    example: '+84312456789',
+    example: '+84901234567',
     required: true,
   })
   @Expose()
-  @IsPhoneNumber('VI', {
-    
-  })
+  @IsVNPhoneNumber()
   @Length(9, 20)
   phoneNumber: string;
 }

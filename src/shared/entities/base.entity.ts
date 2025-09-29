@@ -2,30 +2,36 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
-  JoinColumn,
+  Column,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../../modules/users/entities/user.entity';
+import { AuditUserInfoDto } from '../dto/audit-user-info.dto';
 
 export abstract class BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'created_by' })
-  createdBy: User;
+  @Column({ name: 'created_by', type: 'uuid', nullable: true })
+  createdBy?: string;
+
+  createdByUser?: AuditUserInfoDto;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'updated_by' })
-  updatedBy: User;
+  @Column({ name: 'updated_by', type: 'uuid', nullable: true })
+  updatedBy?: string;
+
+  updatedByUser?: AuditUserInfoDto;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'deleted_by' })
-  deletedBy: User;
+  @Column({ name: 'deleted_by', type: 'uuid', nullable: true })
+  deletedBy?: string;
+
+  deletedByUser?: AuditUserInfoDto;
 }

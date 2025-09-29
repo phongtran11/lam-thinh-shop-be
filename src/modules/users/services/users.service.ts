@@ -1,45 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UsersRepository } from '../repositories/users.repository';
-import { User } from '../entities/user.entity';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from '../dto/user.response.dto';
+import { ClsService } from 'nestjs-cls';
+import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { EncryptionService } from 'src/shared/services/encryption.service';
+import { RoleEnum } from 'src/shared/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  private readonly logger = new Logger(UsersService.name);
 
-  async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const newUser = await this.usersRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
-    return plainToInstance(UserDto, newUser);
-  }
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly clsService: ClsService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.findAll();
-  }
+  async getProfile(): Promise<UserDto> {
+    const userId = this.clsService.get<JwtPayload>('user').sub;
 
-  async findOne(id: string): Promise<UserDto> {
-    const user = await this.usersRepository.findOne(id);
+    const user = await this.usersRepository.findOneByUserId(userId);
+
     return plainToInstance(UserDto, user);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const user = await this.usersRepository.findByEmail(email);
-    return user;
-  }
+  async seedAdminUser() {
+    const adminUser = this.usersRepository.create();
+    adminUser.email = 'admin@example.com';
+    adminUser.password = await this.encryptionService.hash('password123');
+    adminUser.firstName = 'Admin';
+    adminUser.lastName = 'User';
+    adminUser.roleName = RoleEnum.SUPER_ADMIN;
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
-    const user = await this.usersRepository.update(id, updateUserDto);
-    return plainToInstance(UserDto, user);
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.usersRepository.remove(id);
+    await this.usersRepository.upsert(adminUser, ['email']);
   }
 }

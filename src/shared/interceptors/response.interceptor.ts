@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SuccessResponseDto } from '../dto/response.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class GlobalResponseInterceptor<T>
@@ -17,10 +18,10 @@ export class GlobalResponseInterceptor<T>
     next: CallHandler,
   ): Observable<SuccessResponseDto<T>> {
     const httpContext = context.switchToHttp();
-    const response = httpContext.getResponse();
+    const response = httpContext.getResponse<Response>();
 
     return next.handle().pipe(
-      map((data) => ({
+      map((data: T) => ({
         statusCode: response.statusCode,
         message: 'success',
         data,

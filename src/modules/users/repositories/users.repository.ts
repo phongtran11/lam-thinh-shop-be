@@ -1,39 +1,85 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { EntityManager } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository extends BaseRepository<User> {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
-
-  async create(user: Partial<User>): Promise<User | null> {
-    const newUser = this.userRepository.create(user);
-    await this.userRepository.insert(newUser);
-    return await this.findOne(newUser.id);
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
+  ) {
+    super(User, entityManager, entityManager.queryRunner);
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+  async findOneByEmail(email: string): Promise<User | null> {
+    const qb = this.createQueryBuilder('user').select([
+      'user.id',
+      'user.email',
+      'user.password',
+      'user.firstName',
+      'user.lastName',
+      'user.phoneNumber',
+      'user.avatar',
+      'user.roleName',
+      'user.createdAt',
+      'user.createdBy',
+      'user.updatedAt',
+      'user.updatedBy',
+      'user.deletedAt',
+      'user.deletedBy',
+    ]);
+
+    this.buildQueryAudit('user', qb);
+
+    return qb.where('user.email = :email', { email }).getOne();
   }
 
-  async findOne(id: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { id } });
+  async findOneByUserId(id: string): Promise<User | null> {
+    const qb = this.createQueryBuilder('user').select([
+      'user.id',
+      'user.email',
+      'user.firstName',
+      'user.lastName',
+      'user.phoneNumber',
+      'user.avatar',
+      'user.roleName',
+      'user.createdAt',
+      'user.createdBy',
+      'user.updatedAt',
+      'user.updatedBy',
+      'user.deletedAt',
+      'user.deletedBy',
+    ]);
+
+    this.buildQueryAudit('user', qb);
+
+    return qb.where('user.id = :id', { id }).getOne();
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { email } });
-  }
+  async findOneWithRolePermissionsById(id: string): Promise<User | null> {
+    const qb = this.createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.phoneNumber',
+        'user.roleName',
+        'user.createdAt',
+        'user.createdBy',
+        'user.updatedAt',
+        'user.updatedBy',
+        'user.deletedAt',
+        'user.deletedBy',
+      ])
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('role.permissions', 'permissions')
+      .where('user.id = :id', { id });
 
-  async update(id: string, user: Partial<User>): Promise<User | null> {
-    await this.userRepository.update(id, user);
-    return this.findOne(id);
-  }
+    this.buildQueryAudit('user', qb);
 
-  async remove(id: string): Promise<void> {
-    await this.userRepository.softDelete(id);
+    return qb.getOne();
   }
 }

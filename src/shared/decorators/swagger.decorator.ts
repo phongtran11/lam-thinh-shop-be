@@ -16,20 +16,32 @@ import {
   UnauthorizedResponseDto,
 } from '../dto/response.dto';
 
-export const ApiResponseCustom = <T extends Type<any>>(data: T) => {
+export const ApiResponseCustom = <T extends Type<any>>(
+  data: T,
+  options: { isArray?: boolean } = {},
+) => {
   return applyDecorators(
     ApiExtraModels(SuccessResponseDto, data),
     ApiOkResponse({
       schema: {
         allOf: [
           { $ref: getSchemaPath(SuccessResponseDto) },
-          {
-            properties: {
-              data: {
-                $ref: getSchemaPath(data),
+          options.isArray
+            ? {
+                properties: {
+                  data: {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(data) },
+                  },
+                },
+              }
+            : {
+                properties: {
+                  data: {
+                    $ref: getSchemaPath(data),
+                  },
+                },
               },
-            },
-          },
         ],
       },
     }),
@@ -67,7 +79,7 @@ export const ApiBadRequestResponseCustom = () => {
   );
 };
 
-export const ApiUnauthorizedResponseCutom = () => {
+export const ApiUnauthorizedResponseCustom = () => {
   return applyDecorators(
     ApiExtraModels(UnauthorizedResponseDto),
     ApiUnauthorizedResponse({
