@@ -5,7 +5,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AuditUserInfoDto } from '../dto/audit-user-info.dto';
 
 export abstract class BaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -17,21 +16,15 @@ export abstract class BaseEntity {
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy?: string;
 
-  createdByUser?: AuditUserInfoDto;
-
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
   @Column({ name: 'updated_by', type: 'uuid', nullable: true })
   updatedBy?: string;
 
-  updatedByUser?: AuditUserInfoDto;
-
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
   @Column({ name: 'deleted_by', type: 'uuid', nullable: true })
   deletedBy?: string;
-
-  deletedByUser?: AuditUserInfoDto;
 }

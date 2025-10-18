@@ -9,6 +9,7 @@ import { TokenService } from 'src/shared/services/token.service';
 import { JwtPayload } from '../dto/jwt-payload.dto';
 import { Injectable } from '@nestjs/common';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { EncryptionService } from 'src/shared/services/encryption.service';
 
 @Injectable()
 export class RegisterTransaction extends TransactionProvider<
@@ -22,6 +23,7 @@ export class RegisterTransaction extends TransactionProvider<
     @InjectDataSource()
     protected readonly dataSource: DataSource,
     protected readonly tokenService: TokenService,
+    protected readonly encryptionService: EncryptionService,
   ) {
     super(dataSource);
   }
@@ -40,13 +42,16 @@ export class RegisterTransaction extends TransactionProvider<
     const jwtPayload: JwtPayload = {
       sub: newUser.id,
       email: newUser.email,
-      roleName: newUser.roleName,
+      roleId: newUser.roleId,
     };
 
     const tokens = await this.tokenService.generateTokens(jwtPayload);
+    const refreshTokenHash = await this.encryptionService.hash(
+      tokens.refreshToken,
+    );
 
     refreshToken.userId = newUser.id;
-    refreshToken.token = tokens.refreshToken;
+    refreshToken.tokenHash = refreshTokenHash;
     refreshToken.expiresAt = this.tokenService.getRefreshTokenExpirationDate();
 
     await this.refreshTokensRepository.insert(refreshToken);

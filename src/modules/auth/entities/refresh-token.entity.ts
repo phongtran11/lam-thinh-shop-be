@@ -17,26 +17,27 @@ export class RefreshToken {
   @Column({
     type: 'uuid',
     name: 'user_id',
+    comment: 'The ID of the user associated with the refresh token',
   })
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.refreshTokens, {
-    cascade: ['soft-remove', 'remove'],
-  })
+  @ManyToOne(() => User, (user) => user.refreshTokens)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column({
     type: 'varchar',
-    length: 500,
+    length: 60,
     unique: true,
-    name: 'token',
+    name: 'token_hash',
+    comment: 'The hashed value of the refresh token',
   })
-  token: string;
+  tokenHash: string;
 
   @Column({
     type: 'timestamp',
     name: 'expires_at',
+    comment: 'The expiration date and time of the refresh token',
   })
   expiresAt: Date;
 
@@ -44,6 +45,7 @@ export class RefreshToken {
     type: 'boolean',
     default: false,
     name: 'is_revoked',
+    comment: 'Indicates whether the refresh token has been revoked',
   })
   isRevoked: boolean;
 
@@ -51,6 +53,7 @@ export class RefreshToken {
     type: 'timestamp',
     nullable: true,
     name: 'revoked_at',
+    comment: 'The date and time when the refresh token was revoked',
   })
   revokedAt?: Date;
 
@@ -59,30 +62,9 @@ export class RefreshToken {
     length: 50,
     nullable: true,
     name: 'revoke_reason',
+    comment: 'The reason for revoking the refresh token',
   })
   revokeReason?: string;
-
-  @Column({
-    type: 'varchar',
-    length: 45,
-    nullable: true,
-    name: 'ip_address',
-  })
-  ipAddress?: string;
-
-  @Column({
-    type: 'text',
-    nullable: true,
-    name: 'user_agent',
-  })
-  userAgent?: string;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    name: 'last_used_at',
-  })
-  lastUsedAt?: Date;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

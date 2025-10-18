@@ -1,16 +1,15 @@
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
-import { RoleEnum } from 'src/shared/enums/roles.enum';
 import { PermissionEnum } from 'src/shared/enums/permissions.enum';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
-  @Column({ name: 'email', unique: true })
+  @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ name: 'password' })
+  @Column({ name: 'password', type: 'varchar', length: 60 })
   password: string;
 
   @Column({ name: 'first_name', type: 'varchar', length: 64, nullable: true })
@@ -22,22 +21,33 @@ export class User extends BaseEntity {
   @Column({ name: 'phone_number', type: 'varchar', length: 20, nullable: true })
   phoneNumber: string;
 
-  @Column({ nullable: true, type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   avatar: string;
+
+  @Column({
+    name: 'role_id',
+    type: 'uuid',
+  })
+  roleId: string;
+
+  @ManyToOne(() => Role, (role) => role.users)
+  @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
+  role: Role;
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens?: RefreshToken[];
 
-  @Column({
-    name: 'role_name',
-    type: 'varchar',
-    length: 32,
-  })
-  roleName: RoleEnum;
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdByUser?: User;
 
-  @ManyToOne(() => Role, (role) => role.users)
-  @JoinColumn({ name: 'role_name', referencedColumnName: 'name' })
-  role: Role;
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedByUser?: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'deleted_by', referencedColumnName: 'id' })
+  deletedByUser?: User;
 
   get fullName(): string {
     return `${this.firstName || ''} ${this.lastName || ''}`.trim();
@@ -51,11 +61,11 @@ export class User extends BaseEntity {
     return permissions.some((permission) => this.hasPermission(permission));
   }
 
-  hasRole(role: RoleEnum): boolean {
-    return this.roleName === role;
+  hasRole(roleId: string): boolean {
+    return this.roleId === roleId;
   }
 
-  hasAnyRole(roles: RoleEnum[]): boolean {
-    return roles.includes(this.roleName);
+  hasAnyRole(roleIds: string[]): boolean {
+    return roleIds.includes(this.roleId);
   }
 }

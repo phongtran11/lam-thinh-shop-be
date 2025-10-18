@@ -13,22 +13,28 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
     super(RefreshToken, entityManager, entityManager.queryRunner);
   }
 
-  async findValidTokenByToken(token: string): Promise<RefreshToken | null> {
-    return this.createQueryBuilder('refreshToken')
-      .leftJoin('refreshToken.user', 'user')
-      .addSelect(['user.id', 'user.email', 'user.firstName', 'user.lastName'])
-      .where('refreshToken.token = :token', { token })
+  async findValidTokenByToken(tokenHash: string): Promise<RefreshToken | null> {
+    return await this.createQueryBuilder('refreshToken')
+      .leftJoinAndSelect('refreshToken.user', 'user')
+      .where('refreshToken.tokenHash = :tokenHash', { tokenHash })
       .andWhere('refreshToken.isRevoked = :isRevoked', { isRevoked: false })
       .andWhere('refreshToken.expiresAt > :now', { now: new Date() })
+      .select([
+        'refreshToken',
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+      ])
       .getOne();
   }
 
   async revokeTokenByToken(
-    token: string,
+    tokenHash: string,
     reason: RefreshTokenRevokeReasonEnum = RefreshTokenRevokeReasonEnum.MANUAL_REVOKE,
   ): Promise<void> {
     await this.update(
-      { token },
+      { tokenHash },
       {
         isRevoked: true,
         revokedAt: new Date(),
@@ -60,7 +66,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
       {
         isRevoked: true,
         revokedAt: new Date(),
-        revokeReason: 'expired',
+        revokeReason: RefreshTokenRevokeReasonEnum.EXPIRED,
       },
     );
   }

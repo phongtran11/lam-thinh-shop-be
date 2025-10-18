@@ -100,3 +100,14 @@ export const ApiNotFoundResponseCustom = () => {
     }),
   );
 };
+
+export const ApiInternalServerErrorResponseCustom = () => {
+  return applyDecorators(
+    ApiExtraModels(NotFoundResponseDto),
+    ApiNotFoundResponse({
+      schema: {
+        allOf: [{ $ref: getSchemaPath(NotFoundResponseDto) }],
+      },
+    }),
+  );
+};

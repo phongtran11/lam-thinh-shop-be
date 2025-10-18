@@ -6,6 +6,7 @@ import { Configs } from 'src/configs/configs.type';
 import { ClsService } from 'nestjs-cls';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
+import { CLS_JWT_PAYLOAD } from '../enums/cls.enum';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,7 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.getOrThrow('jwt.secret', { infer: true }),
+      secretOrKey: configService.getOrThrow('jwtAccessToken.secret', {
+        infer: true,
+      }),
     });
   }
 
@@ -27,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       payload.sub,
     );
 
-    this.clsService.set<JwtPayload>('user', payload);
+    this.clsService.set<JwtPayload>(CLS_JWT_PAYLOAD, payload);
 
     return user;
   }

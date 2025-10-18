@@ -5,17 +5,22 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { databaseConfig } from './configs/database.config';
-import { jwtConfig, refreshJwtConfig } from './configs/jwt.config';
+import {
+  jwtAccessTokenConfig,
+  jwtRefreshTokenConfig,
+} from './configs/jwt.config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { LogMiddleWare } from './shared/middlewares/log.middleware';
 import { ClsModule } from 'nestjs-cls';
+import { RolesGuard } from './shared/guards/roles.guard';
+import { PermissionsGuard } from './shared/guards/permissions.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig, refreshJwtConfig],
+      load: [databaseConfig, jwtAccessTokenConfig, jwtRefreshTokenConfig],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
     ClsModule.forRoot({
@@ -32,6 +37,14 @@ import { ClsModule } from 'nestjs-cls';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
   ],
 })

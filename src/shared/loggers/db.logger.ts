@@ -6,18 +6,20 @@ export class DatabaseLogger implements Logger {
 
   logQuery(query: string, parameters?: any[]): void {
     const params = parameters ? JSON.stringify(parameters) : '[]';
-    this.logger.log(`Query: ${query} -- Params: ${params}`);
+    this.logger.log(`Query: \n ${query} -- Params: ${params}`);
   }
 
   logQueryError(error: string, query: string, parameters?: any[]): void {
     const params = parameters ? JSON.stringify(parameters) : '[]';
     this.logger.error(`Query Error: ${error}`);
-    this.logger.error(`Query: ${query} -- Params: ${params}`);
+    this.logger.error(`Query: \n ${query} -- Params: ${params}`);
   }
 
   logQuerySlow(time: number, query: string, parameters?: any[]): void {
     const params = parameters ? JSON.stringify(parameters) : '[]';
-    this.logger.warn(`Slow Query (${time}ms): ${query} -- Params: ${params}`);
+    this.logger.warn(
+      `Slow Query (${time}ms): \n ${query} -- Params: ${params}`,
+    );
   }
 
   logSchemaBuild(message: string): void {

@@ -1,8 +1,9 @@
-import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { RoleEnum, type RoleHierarchyEnum } from 'src/shared/enums/roles.enum';
+import { RolePermissions } from './role-permissions.entity';
 import { Permission } from './permission.entity';
-import { RoleEnum as RoleEnum } from 'src/shared/enums/roles.enum';
 
 @Entity('roles')
 export class Role extends BaseEntity {
@@ -10,6 +11,7 @@ export class Role extends BaseEntity {
     type: 'varchar',
     length: 32,
     unique: true,
+    comment: 'Role identifier',
   })
   name: RoleEnum;
 
@@ -17,35 +19,37 @@ export class Role extends BaseEntity {
     name: 'display_name',
     type: 'varchar',
     length: 64,
+    comment: 'Human-readable role name',
   })
   displayName: string;
 
-  @Column({ nullable: true, type: 'varchar', length: 255 })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'Role description',
+  })
   description: string;
 
-  @Column({ default: true, name: 'is_active' })
+  @Column({
+    name: 'is_active',
+    type: 'boolean',
+    default: true,
+    comment: 'Is role active',
+  })
   isActive: boolean;
 
-  @Column({ type: 'int', default: 1 })
-  level: number; // For role hierarchy
+  @Column({ type: 'int', comment: 'Role hierarchy level' })
+  level: RoleHierarchyEnum;
 
   // Relations
   @OneToMany(() => User, (user) => user.role)
   users: User[];
 
-  @ManyToMany(() => Permission, (permission) => permission.roles, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'role_permissions',
-    joinColumn: {
-      name: 'role_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'permission_id',
-      referencedColumnName: 'id',
-    },
-  })
-  permissions: Permission[];
+  @OneToMany(() => RolePermissions, (rolePermissions) => rolePermissions.role)
+  rolePermissions: RolePermissions[];
+
+  get permissions(): Permission[] {
+    return this.rolePermissions?.map((rp) => rp.permission) || [];
+  }
 }

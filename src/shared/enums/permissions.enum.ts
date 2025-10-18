@@ -13,7 +13,6 @@ export enum ActionEnum {
   READ = 'read',
   UPDATE = 'update',
   DELETE = 'delete',
-  UPDATE_STATUS = 'update_status',
 }
 
 export enum PermissionEnum {

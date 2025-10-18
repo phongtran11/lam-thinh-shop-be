@@ -1,9 +1,15 @@
-import { JwtOptions, RefreshJwtOptions } from './jwt.config';
+import { DATABASE } from './database.config';
+import {
+  JWT_ACCESS_TOKEN_CONFIG,
+  JWT_REFRESH_TOKEN_CONFIG,
+  JwtAccessTokenOptions,
+  RefreshJwtOptions,
+} from './jwt.config';
 
 export type Configs = {
-  database: {
+  [DATABASE]: {
     url: string;
   };
-  jwt: JwtOptions;
-  refreshJwt: RefreshJwtOptions;
+  [JWT_ACCESS_TOKEN_CONFIG]: JwtAccessTokenOptions;
+  [JWT_REFRESH_TOKEN_CONFIG]: RefreshJwtOptions;
 };

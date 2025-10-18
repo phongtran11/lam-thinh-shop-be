@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-import { IsVNPhoneNumber } from 'src/shared/decorators/is-vn-phone-number.decorator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumberString,
+  IsString,
+  Length,
+} from 'class-validator';
 import { Match } from 'src/shared/decorators/match.decorator';
-import { Trim } from 'src/shared/decorators/trim.decorator';
 
 @Exclude()
 export class RegisterDto {
@@ -12,7 +16,6 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @Trim()
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -22,7 +25,6 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @Trim()
   @IsString()
   @IsNotEmpty()
   password: string;
@@ -32,7 +34,6 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @Trim()
   @Match('password', { message: 'Passwords do not match' })
   @IsString()
   @IsNotEmpty()
@@ -43,7 +44,6 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @Trim()
   @IsString()
   @Length(1, 64)
   firstName: string;
@@ -53,7 +53,6 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @Trim()
   @IsString()
   @Length(1, 64)
   lastName: string;
@@ -63,7 +62,7 @@ export class RegisterDto {
     required: true,
   })
   @Expose()
-  @IsVNPhoneNumber()
+  @IsNumberString()
   @Length(9, 20)
   phoneNumber: string;
 }

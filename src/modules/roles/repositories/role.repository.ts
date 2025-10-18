@@ -12,4 +12,15 @@ export class RoleRepository extends BaseRepository<Role> {
   ) {
     super(Role, entityManager);
   }
+
+  async findAll(): Promise<Role[]> {
+    return await this.createQueryBuilder('role').getMany();
+  }
+
+  async findRoleByUserId(userId: string): Promise<Role | null> {
+    return await this.createQueryBuilder('role')
+      .innerJoin('role.users', 'user')
+      .where('user.id = :userId', { userId })
+      .getOne();
+  }
 }

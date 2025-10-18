@@ -9,5 +9,5 @@ export class JwtPayload {
   email: string;
 
   @Expose()
-  roleName: string;
+  roleId: string;
 }

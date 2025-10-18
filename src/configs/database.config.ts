@@ -4,6 +4,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { DatabaseLogger } from 'src/shared/loggers/db.logger';
 import { BaseEntitySubscriber } from 'src/shared/subscribers/base-entity.subscriber';
 
+export const DATABASE = 'database';
+
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   url: process.env.DB_URL,
@@ -17,6 +19,6 @@ export const dataSourceOptions: DataSourceOptions = {
 export const dataSource = new DataSource(dataSourceOptions);
 
 export const databaseConfig = registerAs(
-  'database',
+  DATABASE,
   (): TypeOrmModuleOptions => dataSourceOptions,
 );

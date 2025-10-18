@@ -3,7 +3,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { BaseResponse } from 'src/shared/dto/response.dto';
 
 @Exclude()
-export class PermissionResponseDto extends BaseResponse {
+export class PermissionDto extends BaseResponse {
   @Expose()
   @ApiProperty({
     example: 'products:create',

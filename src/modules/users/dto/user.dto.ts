@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Type } from 'class-transformer';
-import { RoleResponseDto } from 'src/modules/roles/dto/role-response.dto';
+import { Exclude, Expose } from 'class-transformer';
 import { BaseResponse } from 'src/shared/dto/response.dto';
-import { RoleEnum } from 'src/shared/enums/roles.enum';
 
 @Exclude()
 export class UserDto extends BaseResponse {
@@ -27,20 +25,10 @@ export class UserDto extends BaseResponse {
   phoneNumber: string;
 
   @Expose()
-  @ApiProperty({ example: 'https://example.com/avatar.jpg' })
+  @ApiProperty({ example: 'avatar.jpg' })
   avatar: string;
 
   @Expose()
-  @ApiProperty({ enum: RoleEnum, example: RoleEnum.STAFF })
-  roleName: RoleEnum;
-}
-
-@Exclude()
-export class UserWithRolePermissionsDto extends UserDto {
-  @Expose()
-  @ApiProperty({
-    type: RoleResponseDto,
-  })
-  @Type(() => RoleResponseDto)
-  role: RoleResponseDto;
+  @ApiProperty({ example: 'fcdbf758-3eb3-429a...' })
+  roleId: string;
 }

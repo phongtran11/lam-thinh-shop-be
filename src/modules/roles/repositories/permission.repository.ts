@@ -13,18 +13,7 @@ export class PermissionRepository extends BaseRepository<Permission> {
     super(Permission, entityManager);
   }
 
-  async findByIds(ids: string[]): Promise<Permission[]> {
-    return this.findByIds(ids);
-  }
-
-  async findOwnedPermissions(userId: string): Promise<Permission[]> {
-    const qb = this.createQueryBuilder('permission')
-      .leftJoin('permission.roles', 'role')
-      .leftJoin('role.users', 'user')
-      .where('user.id = :userId', { userId })
-      .andWhere('permission.isActive = :isActive', { isActive: true });
-    this.buildQueryAudit('permission', qb);
-
-    return qb.getMany();
+  async findAll(): Promise<Permission[]> {
+    return await this.createQueryBuilder('permission').getMany();
   }
 }

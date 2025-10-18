@@ -27,8 +27,10 @@ export class TokenService {
 
   generateAccessToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('jwt.secret', { infer: true }),
-      expiresIn: this.configService.getOrThrow('jwt.expiredIn', {
+      secret: this.configService.getOrThrow('jwtAccessToken.secret', {
+        infer: true,
+      }),
+      expiresIn: this.configService.getOrThrow('jwtAccessToken.expiredIn', {
         infer: true,
       }),
     });
@@ -36,19 +38,22 @@ export class TokenService {
 
   generateRefreshToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('refreshJwt.secret', {
+      secret: this.configService.getOrThrow('jwtRefreshToken.secret', {
         infer: true,
       }),
-      expiresIn: this.configService.getOrThrow('refreshJwt.expiredIn', {
+      expiresIn: this.configService.getOrThrow('jwtRefreshToken.expiredIn', {
         infer: true,
       }),
     });
   }
 
   getRefreshTokenExpirationDate(): Date {
-    const expiresIn = this.configService.getOrThrow('refreshJwt.expiredIn', {
-      infer: true,
-    });
+    const expiresIn = this.configService.getOrThrow(
+      'jwtRefreshToken.expiredIn',
+      {
+        infer: true,
+      },
+    );
 
     const expirationDate = new Date();
     expirationDate.setSeconds(expirationDate.getSeconds() + expiresIn);
@@ -56,9 +61,12 @@ export class TokenService {
   }
 
   getAccessTokenExpirationDate(): Date {
-    const expiresIn = this.configService.getOrThrow('jwt.expiredIn', {
-      infer: true,
-    });
+    const expiresIn = this.configService.getOrThrow(
+      'jwtAccessToken.expiredIn',
+      {
+        infer: true,
+      },
+    );
 
     const expirationDate = new Date();
     expirationDate.setSeconds(expirationDate.getSeconds() + expiresIn);

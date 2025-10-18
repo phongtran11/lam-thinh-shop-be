@@ -1,6 +1,8 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { TokenDto } from '../dto/token.dto';
@@ -8,7 +10,7 @@ import { EncryptionService } from '../../../shared/services/encryption.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { plainToInstance } from 'class-transformer';
 import { JwtPayload } from '../dto/jwt-payload.dto';
-import { UserDto } from '../../users/dto/user.response.dto';
+import { UserDto } from '../../users/dto/user.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
 import { RegisterDto } from '../dto/register.dto';
 import { RegisterTransaction } from '../transactions/register.transaction';
@@ -17,10 +19,14 @@ import { RefreshTokenRequestDto } from '../dto/refresh-token.dto';
 import { RefreshTokenRevokeReasonEnum } from '../enums/auth.enum';
 import { RefreshTokenTransaction } from '../transactions/refresh-token.transaction';
 import { LogoutDto } from '../dto/logout.dto';
-import { RoleEnum } from 'src/shared/enums/roles.enum';
+import { GetMeResponseDto } from '../dto/me.dto';
+import { ClsService } from 'nestjs-cls';
+import { CLS_JWT_PAYLOAD } from 'src/shared/enums/cls.enum';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly refreshTokensRepository: RefreshTokensRepository,
@@ -28,6 +34,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly registerTransaction: RegisterTransaction,
     private readonly refreshTokenTransaction: RefreshTokenTransaction,
+    private readonly clsService: ClsService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<UserDto> {
@@ -46,29 +53,22 @@ export class AuthService {
     return plainToInstance(UserDto, null);
   }
 
-  async login(
-    user: JwtPayload,
-    ipAddress: string,
-    userAgent: string,
-  ): Promise<TokenDto> {
+  async login(user: JwtPayload): Promise<TokenDto> {
     const tokens = await this.tokenService.generateTokens(user);
+    const refreshTokenHash = await this.encryptionService.hash(
+      tokens.refreshToken,
+    );
 
     await this.refreshTokensRepository.insert({
       userId: user.sub,
-      token: tokens.refreshToken,
+      tokenHash: refreshTokenHash,
       expiresAt: this.tokenService.getRefreshTokenExpirationDate(),
-      ipAddress,
-      userAgent,
     });
 
     return plainToInstance(TokenDto, tokens);
   }
 
-  async register(
-    registerDto: RegisterDto,
-    ipAddress: string,
-    userAgent: string,
-  ): Promise<TokenDto> {
+  async register(registerDto: RegisterDto): Promise<TokenDto> {
     const existingUser = await this.usersRepository.findOneByEmail(
       registerDto.email,
     );
@@ -84,13 +84,9 @@ export class AuthService {
     const newUser = this.usersRepository.create({
       ...registerDto,
       password: hashedPassword,
-      roleName: RoleEnum.CUSTOMER,
     });
 
-    const refreshToken = this.refreshTokensRepository.create({
-      ipAddress,
-      userAgent,
-    });
+    const refreshToken = this.refreshTokensRepository.create();
 
     const tokens = await this.registerTransaction.execute(
       newUser,
@@ -105,8 +101,12 @@ export class AuthService {
   ): Promise<TokenDto> {
     const { refreshToken } = refreshTokenRequestDto;
 
+    const requestedTokenHash = await this.encryptionService.hash(refreshToken);
+
     const tokenEntity =
-      await this.refreshTokensRepository.findValidTokenByToken(refreshToken);
+      await this.refreshTokensRepository.findValidTokenByToken(
+        requestedTokenHash,
+      );
 
     if (!tokenEntity) {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -124,17 +124,17 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      roleName: user.roleName,
+      roleId: user.roleId,
     };
 
     const newTokens = await this.tokenService.generateTokens(payload);
-
+    const refreshTokenHash = await this.encryptionService.hash(
+      newTokens.refreshToken,
+    );
     const newRefreshToken = this.refreshTokensRepository.create({
       userId: user.id,
-      token: newTokens.refreshToken,
+      tokenHash: refreshTokenHash,
       expiresAt: this.tokenService.getRefreshTokenExpirationDate(),
-      ipAddress: tokenEntity.ipAddress,
-      userAgent: tokenEntity.userAgent,
     });
 
     await this.refreshTokenTransaction.execute(tokenEntity.id, newRefreshToken);
@@ -147,5 +147,18 @@ export class AuthService {
       logoutDto.refreshToken,
       RefreshTokenRevokeReasonEnum.USER_LOGOUT,
     );
+  }
+
+  async getMe(): Promise<GetMeResponseDto> {
+    const userId = this.clsService.get<JwtPayload>(CLS_JWT_PAYLOAD)?.sub;
+    const user =
+      await this.usersRepository.findOneWithRolePermissionById(userId);
+
+    if (!user) {
+      this.logger.warn(`User with ID ${userId} not found in getMe`);
+      throw new NotFoundException('User not found');
+    }
+
+    return plainToInstance(GetMeResponseDto, user);
   }
 }

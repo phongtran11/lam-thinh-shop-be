@@ -14,72 +14,86 @@ export class UsersRepository extends BaseRepository<User> {
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    const qb = this.createQueryBuilder('user').select([
-      'user.id',
-      'user.email',
-      'user.password',
-      'user.firstName',
-      'user.lastName',
-      'user.phoneNumber',
-      'user.avatar',
-      'user.roleName',
-      'user.createdAt',
-      'user.createdBy',
-      'user.updatedAt',
-      'user.updatedBy',
-      'user.deletedAt',
-      'user.deletedBy',
-    ]);
-
-    this.buildQueryAudit('user', qb);
-
-    return qb.where('user.email = :email', { email }).getOne();
-  }
-
-  async findOneByUserId(id: string): Promise<User | null> {
-    const qb = this.createQueryBuilder('user').select([
-      'user.id',
-      'user.email',
-      'user.firstName',
-      'user.lastName',
-      'user.phoneNumber',
-      'user.avatar',
-      'user.roleName',
-      'user.createdAt',
-      'user.createdBy',
-      'user.updatedAt',
-      'user.updatedBy',
-      'user.deletedAt',
-      'user.deletedBy',
-    ]);
-
-    this.buildQueryAudit('user', qb);
-
-    return qb.where('user.id = :id', { id }).getOne();
-  }
-
-  async findOneWithRolePermissionsById(id: string): Promise<User | null> {
-    const qb = this.createQueryBuilder('user')
+    return await this.createQueryBuilder('user')
+      .where('user.email = :email', { email })
       .select([
         'user.id',
         'user.email',
         'user.firstName',
         'user.lastName',
         'user.phoneNumber',
-        'user.roleName',
+        'user.password',
+        'user.avatar',
+        'user.roleId',
         'user.createdAt',
-        'user.createdBy',
         'user.updatedAt',
-        'user.updatedBy',
         'user.deletedAt',
-        'user.deletedBy',
       ])
+      .getOne();
+  }
+
+  async findOneByUserId(id: string): Promise<User | null> {
+    return await this.createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.phoneNumber',
+        'user.avatar',
+        'user.roleId',
+        'user.createdAt',
+        'user.updatedAt',
+        'user.deletedAt',
+      ])
+      .getOne();
+  }
+
+  async findOneWithRolePermissionsById(id: string): Promise<User | null> {
+    return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
-      .leftJoinAndSelect('role.permissions', 'permissions')
-      .where('user.id = :id', { id });
+      .where('user.id = :id', { id })
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.phoneNumber',
+        'user.roleId',
+        'user.createdAt',
+        'user.updatedAt',
+        'user.deletedAt',
+        'role',
+      ])
+      .getOne();
+  }
 
-    this.buildQueryAudit('user', qb);
-
-    return qb.getOne();
+  async findOneWithRolePermissionById(id: string): Promise<User | null> {
+    return await this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role', 'role.is_active = true')
+      .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
+      .leftJoinAndSelect(
+        'rolePermissions.permission',
+        'permission',
+        'permission.is_active = true',
+      )
+      .where('user.id = :id', { id })
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.phoneNumber',
+        'user.avatar',
+        'user.roleId',
+        'user.createdAt',
+        'user.updatedAt',
+        'user.deletedAt',
+        'role',
+        'rolePermissions',
+        'permission',
+      ])
+      .getOne();
   }
 }

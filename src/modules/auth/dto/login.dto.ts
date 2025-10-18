@@ -5,7 +5,7 @@ import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
 @Exclude()
 export class LoginDto {
   @ApiProperty({
-    example: 'john.doe@example.com',
+    example: 'admin@gmail.com',
     required: true,
   })
   @Expose()

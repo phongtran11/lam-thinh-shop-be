@@ -29,7 +29,7 @@ export class PermissionsGuard implements CanActivate {
 
     if (!user) {
       this.logger.warn('User not found in request');
-      throw new ForbiddenException('Access denied: User not authenticated');
+      throw new ForbiddenException('User not authenticated');
     }
 
     // Check if user has all required permissions
@@ -43,7 +43,7 @@ export class PermissionsGuard implements CanActivate {
           ', ',
         )}`,
       );
-      throw new ForbiddenException('Access denied: Insufficient permissions');
+      throw new ForbiddenException('Insufficient permissions');
     }
 
     this.logger.debug(
@@ -51,6 +51,7 @@ export class PermissionsGuard implements CanActivate {
         ', ',
       )}`,
     );
+
     return true;
   }
 }
