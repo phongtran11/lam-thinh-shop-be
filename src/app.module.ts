@@ -18,6 +18,7 @@ import { RolesGuard } from './shared/guards/roles.guard';
 import { PermissionsGuard } from './shared/guards/permissions.guard';
 import { LoggerModule } from 'pino-nestjs';
 import { Request } from 'express';
+import { cloneDeep } from 'lodash';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { Request } from 'express';
         level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
         serializers: {
           req(request: Request) {
-            const clonedRequest = structuredClone(request);
+            const clonedRequest = cloneDeep(request);
             if (clonedRequest.headers?.authorization) {
               clonedRequest.headers.authorization = '*****';
             }
