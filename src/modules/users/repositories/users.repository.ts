@@ -71,12 +71,15 @@ export class UsersRepository extends BaseRepository<User> {
 
   async findOneWithRolePermissionById(id: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
-      .leftJoinAndSelect('user.role', 'role', 'role.is_active = true')
+      .leftJoinAndSelect('user.role', 'role', 'role.is_active = :isActive', {
+        isActive: true,
+      })
       .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
       .leftJoinAndSelect(
         'rolePermissions.permission',
         'permission',
-        'permission.is_active = true',
+        'permission.is_active = :isActive',
+        { isActive: true },
       )
       .where('user.id = :id', { id })
       .select([

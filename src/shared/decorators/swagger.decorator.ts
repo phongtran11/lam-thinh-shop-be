@@ -11,6 +11,7 @@ import {
 import {
   BadRequestResponseDto,
   CreatedResponseDto,
+  InternalServerErrorResponseDto,
   NotFoundResponseDto,
   SuccessResponseDto,
   UnauthorizedResponseDto,
@@ -103,10 +104,10 @@ export const ApiNotFoundResponseCustom = () => {
 
 export const ApiInternalServerErrorResponseCustom = () => {
   return applyDecorators(
-    ApiExtraModels(NotFoundResponseDto),
+    ApiExtraModels(InternalServerErrorResponseDto),
     ApiNotFoundResponse({
       schema: {
-        allOf: [{ $ref: getSchemaPath(NotFoundResponseDto) }],
+        allOf: [{ $ref: getSchemaPath(InternalServerErrorResponseDto) }],
       },
     }),
   );

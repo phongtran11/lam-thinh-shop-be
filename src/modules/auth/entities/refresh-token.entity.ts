@@ -27,10 +27,10 @@ export class RefreshToken {
 
   @Column({
     type: 'varchar',
-    length: 60,
+    length: 64,
     unique: true,
     name: 'token_hash',
-    comment: 'The hashed value of the refresh token',
+    comment: 'The hashed value of the refresh token (SHA-256)',
   })
   tokenHash: string;
 

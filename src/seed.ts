@@ -296,7 +296,7 @@ async function bootstrap() {
     const rolePermissions = permissions.map((permission) =>
       rolePermissionsRepository.create({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        roleId: role.identifiers?.[0]?.id,
+        roleId: role.identifiers[0].id,
         permissionId: permission.id,
       }),
     );

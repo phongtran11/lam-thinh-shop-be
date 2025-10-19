@@ -46,7 +46,7 @@ export class RegisterTransaction extends TransactionProvider<
     };
 
     const tokens = await this.tokenService.generateTokens(jwtPayload);
-    const refreshTokenHash = await this.encryptionService.hash(
+    const refreshTokenHash = this.encryptionService.hashToken(
       tokens.refreshToken,
     );
 

@@ -55,7 +55,7 @@ export class AuthService {
 
   async login(user: JwtPayload): Promise<TokenDto> {
     const tokens = await this.tokenService.generateTokens(user);
-    const refreshTokenHash = await this.encryptionService.hash(
+    const refreshTokenHash = this.encryptionService.hashToken(
       tokens.refreshToken,
     );
 
@@ -74,6 +74,7 @@ export class AuthService {
     );
 
     if (existingUser) {
+      this.logger.warn(`Email ${registerDto.email} is already in use`);
       throw new ConflictException('Email is already in use');
     }
 
@@ -101,14 +102,15 @@ export class AuthService {
   ): Promise<TokenDto> {
     const { refreshToken } = refreshTokenRequestDto;
 
-    const requestedTokenHash = await this.encryptionService.hash(refreshToken);
+    const requestedTokenHash = this.encryptionService.hashToken(refreshToken);
 
     const tokenEntity =
-      await this.refreshTokensRepository.findValidTokenByToken(
+      await this.refreshTokensRepository.findActiveTokenByHash(
         requestedTokenHash,
       );
 
     if (!tokenEntity) {
+      this.logger.warn(`Refresh token not found or expired`);
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
@@ -117,6 +119,9 @@ export class AuthService {
       await this.refreshTokensRepository.revokeTokenById(
         tokenEntity.id,
         RefreshTokenRevokeReasonEnum.USER_NOT_FOUND,
+      );
+      this.logger.warn(
+        `User with ID ${tokenEntity.userId} not found during refresh token`,
       );
       throw new UnauthorizedException('User not found');
     }
@@ -128,7 +133,7 @@ export class AuthService {
     };
 
     const newTokens = await this.tokenService.generateTokens(payload);
-    const refreshTokenHash = await this.encryptionService.hash(
+    const refreshTokenHash = this.encryptionService.hashToken(
       newTokens.refreshToken,
     );
     const newRefreshToken = this.refreshTokensRepository.create({
@@ -143,8 +148,27 @@ export class AuthService {
   }
 
   async logout(logoutDto: LogoutDto): Promise<void> {
+    const tokenHash = this.encryptionService.hashToken(logoutDto.refreshToken);
+    const validTokenByToken =
+      await this.refreshTokensRepository.findActiveTokenByHash(tokenHash);
+
+    if (!validTokenByToken) {
+      this.logger.warn(`Refresh token not found or already revoked`);
+      throw new UnauthorizedException(
+        'Refresh token not found or already revoked',
+      );
+    }
+
+    const userId = this.clsService.get<JwtPayload>(CLS_JWT_PAYLOAD)?.sub;
+    if (validTokenByToken.userId !== userId) {
+      this.logger.warn(`Refresh token does not belong to the user`);
+      throw new UnauthorizedException(
+        'Refresh token does not belong to the user',
+      );
+    }
+
     await this.refreshTokensRepository.revokeTokenByToken(
-      logoutDto.refreshToken,
+      tokenHash,
       RefreshTokenRevokeReasonEnum.USER_LOGOUT,
     );
   }

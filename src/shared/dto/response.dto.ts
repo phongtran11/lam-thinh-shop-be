@@ -90,6 +90,20 @@ export class NotFoundResponseDto {
   statusCode: number;
 }
 
+export class InternalServerErrorResponseDto {
+  @ApiProperty({
+    example: 'Internal server error',
+    type: String,
+  })
+  message: string;
+
+  @ApiProperty({
+    example: 500,
+    type: Number,
+  })
+  statusCode: number;
+}
+
 @Exclude()
 export class BaseResponse {
   @ApiProperty({

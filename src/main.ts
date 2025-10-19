@@ -5,9 +5,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
+import { Logger } from 'pino-nestjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useLogger(app.get(Logger));
 
   app.use(helmet());
 
@@ -39,7 +42,13 @@ async function bootstrap() {
 
   SwaggerModule.setup(`${routePrefix}/docs`, app, document);
 
-  await app.listen(process.env.APP_PORT ?? 3000);
+  await app.listen(process.env.APP_PORT ?? 3000, () => {
+    app
+      .get(Logger)
+      .log(
+        `Application is running on: http://localhost:${process.env.APP_PORT ?? 3000}/${routePrefix}`,
+      );
+  });
 }
 
 void bootstrap();

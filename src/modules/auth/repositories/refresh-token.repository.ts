@@ -13,7 +13,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
     super(RefreshToken, entityManager, entityManager.queryRunner);
   }
 
-  async findValidTokenByToken(tokenHash: string): Promise<RefreshToken | null> {
+  async findActiveTokenByHash(tokenHash: string): Promise<RefreshToken | null> {
     return await this.createQueryBuilder('refreshToken')
       .leftJoinAndSelect('refreshToken.user', 'user')
       .where('refreshToken.tokenHash = :tokenHash', { tokenHash })
@@ -32,8 +32,8 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
   async revokeTokenByToken(
     tokenHash: string,
     reason: RefreshTokenRevokeReasonEnum = RefreshTokenRevokeReasonEnum.MANUAL_REVOKE,
-  ): Promise<void> {
-    await this.update(
+  ): Promise<UpdateResult> {
+    return await this.update(
       { tokenHash },
       {
         isRevoked: true,

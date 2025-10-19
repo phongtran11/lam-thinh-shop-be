@@ -2,7 +2,7 @@ import { Controller, Post, UseGuards, Body, Req, Get } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { LocalAuthGuard } from '../../../shared/guards/local-auth.guard';
 import { TokenDto } from '../dto/token.dto';
-import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
@@ -53,10 +53,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @Public()
-  @ApiCreatedResponse({
-    description: 'Successfully logged out',
-  })
+  @ApiOkResponse()
   async logout(@Body() logoutDto: LogoutDto): Promise<void> {
     return this.authService.logout(logoutDto);
   }
