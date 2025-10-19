@@ -7,6 +7,7 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiExtraModels,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import {
   BadRequestResponseDto,
@@ -105,7 +106,7 @@ export const ApiNotFoundResponseCustom = () => {
 export const ApiInternalServerErrorResponseCustom = () => {
   return applyDecorators(
     ApiExtraModels(InternalServerErrorResponseDto),
-    ApiNotFoundResponse({
+    ApiInternalServerErrorResponse({
       schema: {
         allOf: [{ $ref: getSchemaPath(InternalServerErrorResponseDto) }],
       },

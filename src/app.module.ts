@@ -36,10 +36,11 @@ import { Request } from 'express';
         level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
         serializers: {
           req(request: Request) {
-            if (request.headers?.authorization) {
-              request.headers.authorization = '*****';
+            const clonedRequest = structuredClone(request);
+            if (clonedRequest.headers?.authorization) {
+              clonedRequest.headers.authorization = '*****';
             }
-            return request;
+            return clonedRequest;
           },
         },
         transport:

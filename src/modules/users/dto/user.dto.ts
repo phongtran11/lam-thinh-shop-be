@@ -29,6 +29,6 @@ export class UserDto extends BaseResponse {
   avatar: string;
 
   @Expose()
-  @ApiProperty({ example: 'fcdbf758-3eb3-429a...' })
+  @ApiProperty({ example: 'fcdbf758-3eb3-429a-b1c3-1234567890ab' })
   roleId: string;
 }
