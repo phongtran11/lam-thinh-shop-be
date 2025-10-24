@@ -20,6 +20,7 @@ export class RefreshTokenCleanupService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
     name: CronjobNameEnum.REFRESH_TOKEN_CLEANUP,
+    timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleCleanupInactiveTokens() {
     this.logger.log('Starting cleanup of inactive refresh tokens...');
@@ -33,20 +34,20 @@ export class RefreshTokenCleanupService {
         `Successfully marked ${expiredResult.affected || 0} expired tokens as revoked`,
       );
 
-      // Delete old inactive tokens (revoked or expired for more than 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      // Delete old inactive tokens (revoked or expired for more than 1 day)
+      const oneDaysAgo = new Date();
+      oneDaysAgo.setDate(oneDaysAgo.getDate() - 1);
 
       const deleteResult = await this.refreshTokensRepository
         .createQueryBuilder()
         .delete()
         .from(RefreshToken)
         .where('isRevoked = :isRevoked', { isRevoked: true })
-        .andWhere('revokedAt < :sevenDaysAgo', { sevenDaysAgo })
+        .andWhere('revokedAt < :oneDaysAgo', { oneDaysAgo })
         .execute();
 
       this.logger.log(
-        `Successfully deleted ${deleteResult.affected || 0} old revoked tokens (older than 7 days)`,
+        `Successfully deleted ${deleteResult.affected || 0} old revoked tokens (older than 1 day)`,
       );
 
       this.logger.log(

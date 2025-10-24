@@ -46,7 +46,7 @@ import { cloneDeep } from 'lodash';
         },
         transport:
           process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty' }
+            ? { target: 'pino-pretty', options: { color: true } }
             : undefined,
       },
       forRoutes: ['*path'],

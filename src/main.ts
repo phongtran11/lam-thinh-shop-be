@@ -5,16 +5,19 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
-import { Logger } from 'pino-nestjs';
+import { Logger, LoggerErrorInterceptor } from 'pino-nestjs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
 
   app.useLogger(app.get(Logger));
 
   app.use(helmet());
 
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
+  app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   app.useGlobalPipes(
     new ValidationPipe({
