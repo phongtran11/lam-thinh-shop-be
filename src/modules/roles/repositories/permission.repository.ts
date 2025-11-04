@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
 import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
 export class PermissionRepository extends BaseRepository<Permission> {
   constructor(
-    @InjectEntityManager()
-    private readonly entityManager: EntityManager,
+    @InjectDataSource()
+    protected dataSource: DataSource,
   ) {
-    super(Permission, entityManager);
+    super(dataSource, Permission);
   }
 
   async findAll(): Promise<Permission[]> {

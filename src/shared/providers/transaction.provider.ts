@@ -1,33 +1,125 @@
-import { Logger } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
+import { BaseRepository } from '../repositories/base.repository';
 
-export abstract class TransactionProvider<Input extends any[], Output> {
-  private readonly logger = new Logger(TransactionProvider.name);
+/**
+ * Base Transaction Class
+ *
+ * Features:
+ * - Auto transaction handling (begin/commit/rollback)
+ * - Auto set/clear manager for all repositories
+ * - Error handling and rollback on failure
+ *
+ * Usage:
+ * class RegisterTransaction extends BaseTransaction {
+ *   constructor(dataSource, userRepo, tokenRepo) {
+ *     super(dataSource);
+ *     this.registerRepository(userRepo);
+ *     this.registerRepository(tokenRepo);
+ *   }
+ *
+ *   async register(input) {
+ *     return this.execute(async () => {
+ *       // All operations here are in transaction
+ *     });
+ *   }
+ * }
+ */
+export abstract class BaseTransaction {
+  /**
+   * Query runner for transaction
+   */
+  private queryRunner: QueryRunner;
 
-  constructor(protected readonly dataSource: DataSource) {}
+  /**
+   * Track all repositories in this transaction
+   */
+  private repositories: BaseRepository<any>[] = [];
 
-  protected abstract transaction(...input: Input): Promise<Output>;
+  constructor(protected dataSource: DataSource) {}
 
-  protected abstract initRepository(entityManager: EntityManager): void;
+  /**
+   * Begin transaction
+   * Set manager for all repositories
+   */
+  private async begin(): Promise<void> {
+    this.queryRunner = this.dataSource.createQueryRunner();
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
 
-  async execute(...input: Input): Promise<Output> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    const entityManager = queryRunner.manager;
+    // Set transaction manager for all repositories
+    this.repositories.forEach((repo) => {
+      repo.setManager(this.queryRunner.manager);
+    });
+  }
 
-    // Init repositories with transaction-aware EntityManager
-    this.initRepository(entityManager);
-
+  /**
+   * Commit transaction
+   * Clear manager from all repositories
+   */
+  private async commit(): Promise<void> {
     try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-      const result = await this.transaction(...input);
-      await queryRunner.commitTransaction();
-      return result;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
+      await this.queryRunner.commitTransaction();
     } finally {
-      await queryRunner.release();
+      this.clearAllRepositories();
+      await this.queryRunner.release();
     }
   }
+
+  /**
+   * Rollback transaction
+   * Clear manager from all repositories
+   */
+  private async rollback(): Promise<void> {
+    try {
+      await this.queryRunner.rollbackTransaction();
+    } finally {
+      this.clearAllRepositories();
+      await this.queryRunner.release();
+    }
+  }
+
+  /**
+   * Clear manager from all repositories
+   */
+  private clearAllRepositories(): void {
+    this.repositories.forEach((repo) => {
+      repo.clearManager();
+    });
+  }
+
+  /**
+   * Register repository to auto set/clear manager
+   */
+  protected registerRepository(repo: BaseRepository<any>): void {
+    this.repositories.push(repo);
+  }
+
+  /**
+   * Execute callback in transaction
+   * Auto begin/commit/rollback
+   */
+  protected async transaction<T>(callback: () => Promise<T>): Promise<T> {
+    await this.begin();
+    try {
+      const result = await callback();
+      await this.commit();
+      return result;
+    } catch (error) {
+      await this.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * Abstract run method to be implemented by subclasses
+   * Use this method to define transaction logic
+   * Example implementation:
+   * async execute(arg1: Type1, arg2: Type2): Promise<ReturnType> {
+   *   return this.transaction(async () => {
+   *     // Transactional operations here
+   *   });
+   * }
+   * @param args
+   */
+  abstract execute(...args: any[]): Promise<any>;
 }

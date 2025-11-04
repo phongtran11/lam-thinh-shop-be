@@ -6,8 +6,8 @@ import { Configs } from 'src/configs/configs.type';
 import { ClsService } from 'nestjs-cls';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { CLS_JWT_PAYLOAD } from '../enums/cls.enum';
 import { PinoLogger } from 'pino-nestjs';
+import { CLS_KEY } from '../constants/cls.constant';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -32,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       payload.sub,
     );
 
-    this.clsService.set<JwtPayload>(CLS_JWT_PAYLOAD, payload);
+    this.clsService.set<JwtPayload>(CLS_KEY.JWT_PAYLOAD, payload);
 
     this.pinoLogger.assign(payload);
 

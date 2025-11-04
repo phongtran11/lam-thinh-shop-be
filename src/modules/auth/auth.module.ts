@@ -3,7 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../users/users.module';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
-import { SharedModule } from '../../shared/shared.module';
+import { SharedModule } from 'src/shared/shared.module';
 import { RegisterTransaction } from './transactions/register.transaction';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';

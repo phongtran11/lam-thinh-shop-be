@@ -17,8 +17,6 @@ import { ClsModule } from 'nestjs-cls';
 import { RolesGuard } from './shared/guards/roles.guard';
 import { PermissionsGuard } from './shared/guards/permissions.guard';
 import { LoggerModule } from 'pino-nestjs';
-import { Request } from 'express';
-import { cloneDeep } from 'lodash';
 
 @Module({
   imports: [
@@ -34,20 +32,20 @@ import { cloneDeep } from 'lodash';
 
     LoggerModule.forRoot({
       pinoHttp: {
-        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
-        serializers: {
-          req(request: Request) {
-            const clonedRequest = cloneDeep(request);
-            if (clonedRequest.headers?.authorization) {
-              clonedRequest.headers.authorization = '*****';
-            }
-            return clonedRequest;
-          },
+        redact: {
+          paths: ['req.headers.authorization', 'req.headers.cookie'],
+          censor: '*****',
         },
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty', options: { color: true } }
-            : undefined,
+        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
+        transport: {
+          targets: [
+            {
+              level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
+              target: 'pino-pretty',
+              options: { color: true },
+            },
+          ],
+        },
       },
       forRoutes: ['*path'],
     }),

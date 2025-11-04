@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { CronjobNameEnum } from '../enums/cronjob-name.enum';
+import { CRONJOB_NAME } from '../constants/cronjob-name.constant';
 
 @Injectable()
 export class RefreshTokenCleanupService {
@@ -19,7 +19,7 @@ export class RefreshTokenCleanupService {
    * - Already revoked tokens
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
-    name: CronjobNameEnum.REFRESH_TOKEN_CLEANUP,
+    name: CRONJOB_NAME.REFRESH_TOKEN_CLEANUP as string,
     timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleCleanupInactiveTokens() {
@@ -39,11 +39,11 @@ export class RefreshTokenCleanupService {
       oneDaysAgo.setDate(oneDaysAgo.getDate() - 1);
 
       const deleteResult = await this.refreshTokensRepository
-        .createQueryBuilder()
+        .createQueryBuilder('refreshToken')
         .delete()
         .from(RefreshToken)
-        .where('isRevoked = :isRevoked', { isRevoked: true })
-        .andWhere('revokedAt < :oneDaysAgo', { oneDaysAgo })
+        .where('refreshToken.isRevoked = :isRevoked', { isRevoked: true })
+        .andWhere('refreshToken.revokedAt < :oneDaysAgo', { oneDaysAgo })
         .execute();
 
       this.logger.log(

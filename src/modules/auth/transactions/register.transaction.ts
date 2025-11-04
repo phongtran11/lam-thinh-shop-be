@@ -1,6 +1,6 @@
-import { TransactionProvider } from 'src/shared/providers/transaction.provider';
+import { BaseTransaction } from 'src/shared/providers/transaction.provider';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
 import { User } from 'src/modules/users/entities/user.entity';
 import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
@@ -12,31 +12,21 @@ import { RefreshToken } from '../entities/refresh-token.entity';
 import { EncryptionService } from 'src/shared/services/encryption.service';
 
 @Injectable()
-export class RegisterTransaction extends TransactionProvider<
-  [User, RefreshToken],
-  TokenDto
-> {
-  protected usersRepository: UsersRepository;
-  protected refreshTokensRepository: RefreshTokensRepository;
-
+export class RegisterTransaction extends BaseTransaction {
   constructor(
     @InjectDataSource()
     protected readonly dataSource: DataSource,
     protected readonly tokenService: TokenService,
     protected readonly encryptionService: EncryptionService,
+    protected readonly usersRepository: UsersRepository,
+    protected readonly refreshTokensRepository: RefreshTokensRepository,
   ) {
     super(dataSource);
+    this.registerRepository(usersRepository);
+    this.registerRepository(refreshTokensRepository);
   }
 
-  protected initRepository(entityManager: EntityManager) {
-    this.usersRepository = new UsersRepository(entityManager);
-    this.refreshTokensRepository = new RefreshTokensRepository(entityManager);
-  }
-
-  protected async transaction(
-    newUser: User,
-    refreshToken: RefreshToken,
-  ): Promise<TokenDto> {
+  async execute(newUser: User, refreshToken: RefreshToken): Promise<TokenDto> {
     await this.usersRepository.insert(newUser);
 
     const jwtPayload: JwtPayload = {

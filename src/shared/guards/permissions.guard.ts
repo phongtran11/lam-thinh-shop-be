@@ -6,9 +6,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PermissionEnum } from 'src/shared/enums/permissions.enum';
 import { PERMISSIONS_KEY } from 'src/shared/decorators/permissions.decorator';
 import { User } from 'src/modules/users/entities/user.entity';
+import { EPermissions } from '../constants/permission.constant';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -18,7 +18,7 @@ export class PermissionsGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const requiredPermissions = this.reflector.getAllAndOverride<
-      PermissionEnum[]
+      EPermissions[]
     >(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermissions || requiredPermissions.length === 0) {
@@ -28,7 +28,6 @@ export class PermissionsGuard implements CanActivate {
     const { user }: { user: User } = context.switchToHttp().getRequest();
 
     if (!user) {
-      this.logger.warn('User not found in request');
       throw new ForbiddenException('User not authenticated');
     }
 
@@ -38,12 +37,9 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasAllPermissions) {
-      this.logger.warn(
-        `User ${user.email} attempted to access resource requiring permissions: ${requiredPermissions.join(
-          ', ',
-        )}`,
+      throw new ForbiddenException(
+        `User ${user.email} attempted to access resource requiring permissions: ${requiredPermissions.join(',')}`,
       );
-      throw new ForbiddenException('Insufficient permissions');
     }
 
     this.logger.debug(

@@ -1,54 +1,54 @@
 import { SetMetadata } from '@nestjs/common';
-import { PermissionEnum } from 'src/shared/enums/permissions.enum';
+import { EPermissions, PERMISSIONS } from '../constants/permission.constant';
 
 export const PERMISSIONS_KEY = 'permissions';
-export const Permissions = (...permissions: PermissionEnum[]) =>
+export const Permissions = (...permissions: EPermissions[]) =>
   SetMetadata(PERMISSIONS_KEY, permissions);
 
 // Users Permissions Decorators
 export const PermissionUsersCreate = () =>
-  Permissions(PermissionEnum.USERS_CREATE);
-export const PermissionUsersRead = () => Permissions(PermissionEnum.USERS_READ);
+  Permissions(PERMISSIONS.USERS_CREATE);
+export const PermissionUsersRead = () => Permissions(PERMISSIONS.USERS_READ);
 export const PermissionUsersUpdate = () =>
-  Permissions(PermissionEnum.USERS_UPDATE);
+  Permissions(PERMISSIONS.USERS_UPDATE);
 export const PermissionUsersDelete = () =>
-  Permissions(PermissionEnum.USERS_DELETE);
+  Permissions(PERMISSIONS.USERS_DELETE);
 
 // Roles Permissions Decorators
 export const PermissionRolesCreate = () =>
-  Permissions(PermissionEnum.ROLES_CREATE);
-export const PermissionRolesRead = () => Permissions(PermissionEnum.ROLES_READ);
+  Permissions(PERMISSIONS.ROLES_CREATE);
+export const PermissionRolesRead = () => Permissions(PERMISSIONS.ROLES_READ);
 export const PermissionRolesUpdate = () =>
-  Permissions(PermissionEnum.ROLES_UPDATE);
+  Permissions(PERMISSIONS.ROLES_UPDATE);
 export const PermissionRolesDelete = () =>
-  Permissions(PermissionEnum.ROLES_DELETE);
+  Permissions(PERMISSIONS.ROLES_DELETE);
 
 // Permissions Management Decorators
 export const PermissionPermissionsCreate = () =>
-  Permissions(PermissionEnum.PERMISSIONS_CREATE);
+  Permissions(PERMISSIONS.PERMISSIONS_CREATE);
 export const PermissionPermissionsRead = () =>
-  Permissions(PermissionEnum.PERMISSIONS_READ);
+  Permissions(PERMISSIONS.PERMISSIONS_READ);
 export const PermissionPermissionsUpdate = () =>
-  Permissions(PermissionEnum.PERMISSIONS_UPDATE);
+  Permissions(PERMISSIONS.PERMISSIONS_UPDATE);
 export const PermissionPermissionsDelete = () =>
-  Permissions(PermissionEnum.PERMISSIONS_DELETE);
+  Permissions(PERMISSIONS.PERMISSIONS_DELETE);
 
 // Products Permissions Decorators
 export const PermissionProductsCreate = () =>
-  Permissions(PermissionEnum.PRODUCTS_CREATE);
+  Permissions(PERMISSIONS.PRODUCTS_CREATE);
 export const PermissionProductsRead = () =>
-  Permissions(PermissionEnum.PRODUCTS_READ);
+  Permissions(PERMISSIONS.PRODUCTS_READ);
 export const PermissionProductsUpdate = () =>
-  Permissions(PermissionEnum.PRODUCTS_UPDATE);
+  Permissions(PERMISSIONS.PRODUCTS_UPDATE);
 export const PermissionProductsDelete = () =>
-  Permissions(PermissionEnum.PRODUCTS_DELETE);
+  Permissions(PERMISSIONS.PRODUCTS_DELETE);
 
 // Categories Permissions Decorators
 export const PermissionCategoriesCreate = () =>
-  Permissions(PermissionEnum.CATEGORIES_CREATE);
+  Permissions(PERMISSIONS.CATEGORIES_CREATE);
 export const PermissionCategoriesRead = () =>
-  Permissions(PermissionEnum.CATEGORIES_READ);
+  Permissions(PERMISSIONS.CATEGORIES_READ);
 export const PermissionCategoriesUpdate = () =>
-  Permissions(PermissionEnum.CATEGORIES_UPDATE);
+  Permissions(PERMISSIONS.CATEGORIES_UPDATE);
 export const PermissionCategoriesDelete = () =>
-  Permissions(PermissionEnum.CATEGORIES_DELETE);
+  Permissions(PERMISSIONS.CATEGORIES_DELETE);

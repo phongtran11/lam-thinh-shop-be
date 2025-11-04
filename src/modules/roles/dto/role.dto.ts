@@ -1,14 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { RoleEnum as RoleEnum } from 'src/shared/enums/roles.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { BaseResponse } from 'src/shared/dto/response.dto';
 import { PermissionDto } from './permission.dto';
+import { ROLES, type ERoles } from 'src/shared/constants/role.constant';
 
 @Exclude()
 export class RoleDto extends BaseResponse {
   @Expose()
-  @ApiProperty({ enum: RoleEnum, example: RoleEnum.STAFF })
-  name: RoleEnum;
+  @ApiProperty({ enum: ROLES, example: ROLES.ADMIN })
+  name: ERoles;
 
   @Expose()
   @ApiProperty({

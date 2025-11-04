@@ -1,30 +1,37 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  RoleDescriptions,
-  RoleEnum,
-  RoleHierarchy,
-} from './shared/enums/roles.enum';
+
 import { User } from './modules/users/entities/user.entity';
 import { Role } from './modules/roles/entities/role.entity';
 import { Permission } from './modules/roles/entities/permission.entity';
-import { PermissionEnum, ResourceEnum } from './shared/enums/permissions.enum';
+
 import { PermissionRepository } from './modules/roles/repositories/permission.repository';
-import { RolePermissionsRepository } from './modules/roles/repositories/role-permissions.repository';
 import { RoleRepository } from './modules/roles/repositories/role.repository';
 import { UsersRepository } from './modules/users/repositories/users.repository';
 import { In } from 'typeorm';
 import { EncryptionService } from './shared/services/encryption.service';
 import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
+import { RolePermissionsRepository } from './modules/roles/repositories/role-permissions.repository';
+import {
+  ERoles,
+  ROLE_DESCRIPTION,
+  ROLE_HIERARCHY,
+  ROLES,
+} from './shared/constants/role.constant';
+import {
+  EPermissions,
+  PERMISSIONS,
+  RESOURCES,
+} from './shared/constants/permission.constant';
 
-const initUsers: Array<Partial<User> & { roleName: RoleEnum }> = [
+const initUsers: Array<Partial<User> & { roleName: ERoles }> = [
   {
     email: 'admin@gmail.com',
     password: 'password123',
     firstName: 'Admin',
     lastName: 'User',
     phoneNumber: '0123456789',
-    roleName: RoleEnum.ADMIN,
+    roleName: ROLES.ADMIN,
   },
   {
     email: 'manager@gmail.com',
@@ -32,7 +39,7 @@ const initUsers: Array<Partial<User> & { roleName: RoleEnum }> = [
     firstName: 'Manager',
     lastName: 'User',
     phoneNumber: '0123456789',
-    roleName: RoleEnum.MANAGER,
+    roleName: ROLES.MANAGER,
   },
   {
     email: 'staff@gmail.com',
@@ -40,7 +47,7 @@ const initUsers: Array<Partial<User> & { roleName: RoleEnum }> = [
     firstName: 'Staff',
     lastName: 'User',
     phoneNumber: '0123456789',
-    roleName: RoleEnum.STAFF,
+    roleName: ROLES.STAFF,
   },
   {
     email: 'customer@gmail.com',
@@ -48,208 +55,204 @@ const initUsers: Array<Partial<User> & { roleName: RoleEnum }> = [
     firstName: 'Customer',
     lastName: 'User',
     phoneNumber: '0123456789',
-    roleName: RoleEnum.CUSTOMER,
+    roleName: ROLES.CUSTOMER,
   },
 ];
 
-const initRoles: Array<Partial<Role> & { permissionNames: PermissionEnum[] }> =
-  [
-    {
-      name: RoleEnum.ADMIN,
-      displayName: 'Administrator',
-      description: RoleDescriptions[RoleEnum.ADMIN],
-      level: RoleHierarchy[RoleEnum.ADMIN],
-      permissionNames: [
-        PermissionEnum.USERS_CREATE,
-        PermissionEnum.USERS_READ,
-        PermissionEnum.USERS_UPDATE,
-        PermissionEnum.USERS_DELETE,
-        PermissionEnum.ROLES_CREATE,
-        PermissionEnum.ROLES_READ,
-        PermissionEnum.ROLES_UPDATE,
-        PermissionEnum.ROLES_DELETE,
-        PermissionEnum.PERMISSIONS_CREATE,
-        PermissionEnum.PERMISSIONS_READ,
-        PermissionEnum.PERMISSIONS_UPDATE,
-        PermissionEnum.PERMISSIONS_DELETE,
-        PermissionEnum.PRODUCTS_CREATE,
-        PermissionEnum.PRODUCTS_READ,
-        PermissionEnum.PRODUCTS_UPDATE,
-        PermissionEnum.PRODUCTS_DELETE,
-        PermissionEnum.CATEGORIES_CREATE,
-        PermissionEnum.CATEGORIES_READ,
-        PermissionEnum.CATEGORIES_UPDATE,
-        PermissionEnum.CATEGORIES_DELETE,
-      ],
-    },
-    {
-      name: RoleEnum.MANAGER,
-      displayName: 'Manager',
-      description: RoleDescriptions[RoleEnum.MANAGER],
-      level: RoleHierarchy[RoleEnum.MANAGER],
-      permissionNames: [
-        PermissionEnum.USERS_CREATE,
-        PermissionEnum.USERS_READ,
-        PermissionEnum.USERS_UPDATE,
-        PermissionEnum.USERS_DELETE,
-        PermissionEnum.PRODUCTS_CREATE,
-        PermissionEnum.PRODUCTS_READ,
-        PermissionEnum.PRODUCTS_UPDATE,
-        PermissionEnum.PRODUCTS_DELETE,
-        PermissionEnum.CATEGORIES_CREATE,
-        PermissionEnum.CATEGORIES_READ,
-        PermissionEnum.CATEGORIES_UPDATE,
-        PermissionEnum.CATEGORIES_DELETE,
-      ],
-    },
-    {
-      name: RoleEnum.STAFF,
-      displayName: 'Staff',
-      description: RoleDescriptions[RoleEnum.STAFF],
-      level: RoleHierarchy[RoleEnum.STAFF],
-      permissionNames: [
-        PermissionEnum.PRODUCTS_CREATE,
-        PermissionEnum.PRODUCTS_READ,
-        PermissionEnum.PRODUCTS_UPDATE,
-        PermissionEnum.PRODUCTS_DELETE,
-        PermissionEnum.CATEGORIES_CREATE,
-        PermissionEnum.CATEGORIES_READ,
-        PermissionEnum.CATEGORIES_UPDATE,
-        PermissionEnum.CATEGORIES_DELETE,
-      ],
-    },
-    {
-      name: RoleEnum.CUSTOMER,
-      displayName: 'Customer',
-      description: RoleDescriptions[RoleEnum.CUSTOMER],
-      level: RoleHierarchy[RoleEnum.CUSTOMER],
-      permissionNames: [
-        PermissionEnum.PRODUCTS_READ,
-        PermissionEnum.CATEGORIES_READ,
-      ],
-    },
-  ];
+const initRoles: Array<Partial<Role> & { permissionNames: EPermissions[] }> = [
+  {
+    name: ROLES.ADMIN,
+    displayName: 'Administrator',
+    description: ROLE_DESCRIPTION[ROLES.ADMIN],
+    level: ROLE_HIERARCHY[ROLES.ADMIN],
+    permissionNames: [
+      PERMISSIONS.USERS_CREATE,
+      PERMISSIONS.USERS_READ,
+      PERMISSIONS.USERS_UPDATE,
+      PERMISSIONS.USERS_DELETE,
+      PERMISSIONS.ROLES_CREATE,
+      PERMISSIONS.ROLES_READ,
+      PERMISSIONS.ROLES_UPDATE,
+      PERMISSIONS.ROLES_DELETE,
+      PERMISSIONS.PERMISSIONS_CREATE,
+      PERMISSIONS.PERMISSIONS_READ,
+      PERMISSIONS.PERMISSIONS_UPDATE,
+      PERMISSIONS.PERMISSIONS_DELETE,
+      PERMISSIONS.PRODUCTS_CREATE,
+      PERMISSIONS.PRODUCTS_READ,
+      PERMISSIONS.PRODUCTS_UPDATE,
+      PERMISSIONS.PRODUCTS_DELETE,
+      PERMISSIONS.CATEGORIES_CREATE,
+      PERMISSIONS.CATEGORIES_READ,
+      PERMISSIONS.CATEGORIES_UPDATE,
+      PERMISSIONS.CATEGORIES_DELETE,
+    ],
+  },
+  {
+    name: ROLES.MANAGER,
+    displayName: 'Manager',
+    description: ROLE_DESCRIPTION[ROLES.MANAGER],
+    level: ROLE_HIERARCHY[ROLES.MANAGER],
+    permissionNames: [
+      PERMISSIONS.USERS_CREATE,
+      PERMISSIONS.USERS_READ,
+      PERMISSIONS.USERS_UPDATE,
+      PERMISSIONS.USERS_DELETE,
+      PERMISSIONS.PRODUCTS_CREATE,
+      PERMISSIONS.PRODUCTS_READ,
+      PERMISSIONS.PRODUCTS_UPDATE,
+      PERMISSIONS.PRODUCTS_DELETE,
+      PERMISSIONS.CATEGORIES_CREATE,
+      PERMISSIONS.CATEGORIES_READ,
+      PERMISSIONS.CATEGORIES_UPDATE,
+      PERMISSIONS.CATEGORIES_DELETE,
+    ],
+  },
+  {
+    name: ROLES.STAFF,
+    displayName: 'Staff',
+    description: ROLE_DESCRIPTION[ROLES.STAFF],
+    level: ROLE_HIERARCHY[ROLES.STAFF],
+    permissionNames: [
+      PERMISSIONS.PRODUCTS_CREATE,
+      PERMISSIONS.PRODUCTS_READ,
+      PERMISSIONS.PRODUCTS_UPDATE,
+      PERMISSIONS.PRODUCTS_DELETE,
+      PERMISSIONS.CATEGORIES_CREATE,
+      PERMISSIONS.CATEGORIES_READ,
+      PERMISSIONS.CATEGORIES_UPDATE,
+      PERMISSIONS.CATEGORIES_DELETE,
+    ],
+  },
+  {
+    name: ROLES.CUSTOMER,
+    displayName: 'Customer',
+    description: ROLE_DESCRIPTION[ROLES.CUSTOMER],
+    level: ROLE_HIERARCHY[ROLES.CUSTOMER],
+    permissionNames: [PERMISSIONS.PRODUCTS_READ, PERMISSIONS.CATEGORIES_READ],
+  },
+];
 
 const initPermissions: Array<Partial<Permission>> = [
   {
-    name: PermissionEnum.USERS_READ,
+    name: PERMISSIONS.USERS_READ,
     displayName: 'Read Users',
     description: 'Permission to read user information',
-    resource: ResourceEnum.USERS,
+    resource: RESOURCES.USERS,
   },
   {
-    name: PermissionEnum.USERS_CREATE,
+    name: PERMISSIONS.USERS_CREATE,
     displayName: 'Create Users',
     description: 'Permission to create new users',
-    resource: ResourceEnum.USERS,
+    resource: RESOURCES.USERS,
   },
   {
-    name: PermissionEnum.USERS_UPDATE,
+    name: PERMISSIONS.USERS_UPDATE,
     displayName: 'Update Users',
     description: 'Permission to update user information',
-    resource: ResourceEnum.USERS,
+    resource: RESOURCES.USERS,
   },
   {
-    name: PermissionEnum.USERS_DELETE,
+    name: PERMISSIONS.USERS_DELETE,
     displayName: 'Delete Users',
     description: 'Permission to delete users',
-    resource: ResourceEnum.USERS,
+    resource: RESOURCES.USERS,
   },
   {
-    name: PermissionEnum.PRODUCTS_READ,
+    name: PERMISSIONS.PRODUCTS_READ,
     displayName: 'Read Products',
     description: 'Permission to read product information',
-    resource: ResourceEnum.PRODUCTS,
+    resource: RESOURCES.PRODUCTS,
   },
   {
-    name: PermissionEnum.PRODUCTS_CREATE,
+    name: PERMISSIONS.PRODUCTS_CREATE,
     displayName: 'Create Products',
     description: 'Permission to create new products',
-    resource: ResourceEnum.PRODUCTS,
+    resource: RESOURCES.PRODUCTS,
   },
   {
-    name: PermissionEnum.PRODUCTS_UPDATE,
+    name: PERMISSIONS.PRODUCTS_UPDATE,
     displayName: 'Update Products',
     description: 'Permission to update product information',
-    resource: ResourceEnum.PRODUCTS,
+    resource: RESOURCES.PRODUCTS,
   },
   {
-    name: PermissionEnum.PRODUCTS_DELETE,
+    name: PERMISSIONS.PRODUCTS_DELETE,
     displayName: 'Delete Products',
     description: 'Permission to delete products',
-    resource: ResourceEnum.PRODUCTS,
+    resource: RESOURCES.PRODUCTS,
   },
   {
-    name: PermissionEnum.CATEGORIES_READ,
+    name: PERMISSIONS.CATEGORIES_READ,
     displayName: 'Read Categories',
     description: 'Permission to read category information',
-    resource: ResourceEnum.CATEGORIES,
+    resource: RESOURCES.CATEGORIES,
   },
   {
-    name: PermissionEnum.CATEGORIES_CREATE,
+    name: PERMISSIONS.CATEGORIES_CREATE,
     displayName: 'Create Categories',
     description: 'Permission to create new categories',
-    resource: ResourceEnum.CATEGORIES,
+    resource: RESOURCES.CATEGORIES,
   },
   {
-    name: PermissionEnum.CATEGORIES_UPDATE,
+    name: PERMISSIONS.CATEGORIES_UPDATE,
     displayName: 'Update Categories',
     description: 'Permission to update category information',
-    resource: ResourceEnum.CATEGORIES,
+    resource: RESOURCES.CATEGORIES,
   },
   {
-    name: PermissionEnum.CATEGORIES_DELETE,
+    name: PERMISSIONS.CATEGORIES_DELETE,
     displayName: 'Delete Categories',
     description: 'Permission to delete categories',
-    resource: ResourceEnum.CATEGORIES,
+    resource: RESOURCES.CATEGORIES,
   },
   {
-    name: PermissionEnum.ROLES_READ,
+    name: PERMISSIONS.ROLES_READ,
     displayName: 'Read Roles',
     description: 'Permission to read role information',
-    resource: ResourceEnum.ROLES,
+    resource: RESOURCES.ROLES,
   },
   {
-    name: PermissionEnum.ROLES_CREATE,
+    name: PERMISSIONS.ROLES_CREATE,
     displayName: 'Create Roles',
     description: 'Permission to create new roles',
-    resource: ResourceEnum.ROLES,
+    resource: RESOURCES.ROLES,
   },
   {
-    name: PermissionEnum.ROLES_UPDATE,
+    name: PERMISSIONS.ROLES_UPDATE,
     displayName: 'Update Roles',
     description: 'Permission to update role information',
-    resource: ResourceEnum.ROLES,
+    resource: RESOURCES.ROLES,
   },
   {
-    name: PermissionEnum.ROLES_DELETE,
+    name: PERMISSIONS.ROLES_DELETE,
     displayName: 'Delete Roles',
     description: 'Permission to delete roles',
-    resource: ResourceEnum.ROLES,
+    resource: RESOURCES.ROLES,
   },
   {
-    name: PermissionEnum.PERMISSIONS_READ,
+    name: PERMISSIONS.PERMISSIONS_READ,
     displayName: 'Read Permissions',
     description: 'Permission to read permission information',
-    resource: ResourceEnum.PERMISSIONS,
+    resource: RESOURCES.PERMISSIONS,
   },
   {
-    name: PermissionEnum.PERMISSIONS_CREATE,
+    name: PERMISSIONS.PERMISSIONS_CREATE,
     displayName: 'Create Permissions',
     description: 'Permission to create new permissions',
-    resource: ResourceEnum.PERMISSIONS,
+    resource: RESOURCES.PERMISSIONS,
   },
   {
-    name: PermissionEnum.PERMISSIONS_UPDATE,
+    name: PERMISSIONS.PERMISSIONS_UPDATE,
     displayName: 'Update Permissions',
     description: 'Permission to update permission information',
-    resource: ResourceEnum.PERMISSIONS,
+    resource: RESOURCES.PERMISSIONS,
   },
   {
-    name: PermissionEnum.PERMISSIONS_DELETE,
+    name: PERMISSIONS.PERMISSIONS_DELETE,
     displayName: 'Delete Permissions',
     description: 'Permission to delete permissions',
-    resource: ResourceEnum.PERMISSIONS,
+    resource: RESOURCES.PERMISSIONS,
   },
 ];
 
@@ -274,7 +277,7 @@ async function bootstrap() {
   console.log('✅ Existing data cleared\n');
 
   // Upsert permissions
-  console.log('📋 Seeding permissions...');
+  console.log('📋 Seeding EPermissions...');
   const permissions = initPermissions.map((permission) =>
     permissionRepository.create(permission),
   );
@@ -284,7 +287,7 @@ async function bootstrap() {
   console.log(`✅ Successfully seeded ${initPermissions.length} permissions\n`);
 
   // Upsert roles with permissions
-  console.log('👥 Seeding roles...');
+  console.log('👥 Seeding ERoles...');
   for (const roleData of initRoles) {
     const { permissionNames, ...roleInfo } = roleData;
 

@@ -36,9 +36,6 @@ async function bootstrap() {
     .addBearerAuth()
     .addSecurityRequirements('bearer')
     .setVersion(version)
-    .addGlobalResponse({
-      status: 400,
-    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

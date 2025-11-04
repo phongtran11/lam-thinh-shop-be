@@ -1,9 +1,12 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { RoleEnum, type RoleHierarchyEnum } from 'src/shared/enums/roles.enum';
 import { RolePermissions } from './role-permissions.entity';
 import { Permission } from './permission.entity';
+import {
+  type ERoleHierarchy,
+  type ERoles,
+} from 'src/shared/constants/role.constant';
 
 @Entity('roles')
 export class Role extends BaseEntity {
@@ -13,7 +16,7 @@ export class Role extends BaseEntity {
     unique: true,
     comment: 'Role identifier',
   })
-  name: RoleEnum;
+  name: ERoles;
 
   @Column({
     name: 'display_name',
@@ -40,7 +43,7 @@ export class Role extends BaseEntity {
   isActive: boolean;
 
   @Column({ type: 'int', comment: 'Role hierarchy level' })
-  level: RoleHierarchyEnum;
+  level: ERoleHierarchy;
 
   // Relations
   @OneToMany(() => User, (user) => user.role)

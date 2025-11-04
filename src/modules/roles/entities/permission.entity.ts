@@ -1,11 +1,12 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Role } from './role.entity';
-import {
-  PermissionEnum,
-  ResourceEnum,
-} from 'src/shared/enums/permissions.enum';
+
 import { RolePermissions } from './role-permissions.entity';
+import {
+  type EPermissions,
+  type EResources,
+} from 'src/shared/constants/permission.constant';
 
 @Entity('permissions')
 export class Permission extends BaseEntity {
@@ -15,7 +16,7 @@ export class Permission extends BaseEntity {
     unique: true,
     comment: 'Permission identifier',
   })
-  name: PermissionEnum;
+  name: EPermissions;
 
   @Column({
     name: 'display_name',
@@ -40,7 +41,7 @@ export class Permission extends BaseEntity {
     length: 255,
     comment: 'Resource associated with the permission',
   })
-  resource: ResourceEnum;
+  resource: EResources;
 
   @Column({
     name: 'is_active',

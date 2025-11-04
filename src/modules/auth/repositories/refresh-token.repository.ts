@@ -1,20 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectEntityManager } from '@nestjs/typeorm';
-import { Repository, EntityManager, LessThan, UpdateResult } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { LessThan, UpdateResult } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { RefreshTokenRevokeReasonEnum } from '../enums/auth.enum';
+
+import { BaseRepository } from 'src/shared/repositories/base.repository';
+import { DataSource } from 'typeorm';
+import {
+  ERefreshTokenRevokeReason,
+  REFRESH_TOKEN_REVOKE_REASON,
+} from 'src/shared/constants/auth.constant';
 
 @Injectable()
-export class RefreshTokensRepository extends Repository<RefreshToken> {
+export class RefreshTokensRepository extends BaseRepository<RefreshToken> {
   constructor(
-    @InjectEntityManager()
-    private readonly entityManager: EntityManager,
+    @InjectDataSource()
+    protected dataSource: DataSource,
   ) {
-    super(RefreshToken, entityManager, entityManager.queryRunner);
+    super(dataSource, RefreshToken);
   }
 
   async findActiveTokenByHash(tokenHash: string): Promise<RefreshToken | null> {
-    return await this.createQueryBuilder('refreshToken')
+    return this.createQueryBuilder('refreshToken')
       .leftJoinAndSelect('refreshToken.user', 'user')
       .where('refreshToken.tokenHash = :tokenHash', { tokenHash })
       .andWhere('refreshToken.isRevoked = :isRevoked', { isRevoked: false })
@@ -29,11 +35,17 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
       .getOne();
   }
 
+  async findOneById(tokenId: string): Promise<RefreshToken | null> {
+    return this.createQueryBuilder('refreshToken')
+      .where('refreshToken.id = :tokenId', { tokenId })
+      .getOne();
+  }
+
   async revokeTokenByToken(
     tokenHash: string,
-    reason: RefreshTokenRevokeReasonEnum = RefreshTokenRevokeReasonEnum.MANUAL_REVOKE,
+    reason: ERefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
   ): Promise<UpdateResult> {
-    return await this.update(
+    return this.update(
       { tokenHash },
       {
         isRevoked: true,
@@ -45,9 +57,9 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
 
   async revokeTokenById(
     tokenId: string,
-    reason: RefreshTokenRevokeReasonEnum = RefreshTokenRevokeReasonEnum.MANUAL_REVOKE,
-  ): Promise<void> {
-    await this.update(
+    reason: ERefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
+  ): Promise<UpdateResult> {
+    return this.update(
       { id: tokenId },
       {
         isRevoked: true,
@@ -58,7 +70,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
   }
 
   async cleanupExpiredTokens(): Promise<UpdateResult> {
-    return await this.update(
+    return this.update(
       {
         expiresAt: LessThan(new Date()),
         isRevoked: false,
@@ -66,7 +78,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
       {
         isRevoked: true,
         revokedAt: new Date(),
-        revokeReason: RefreshTokenRevokeReasonEnum.EXPIRED,
+        revokeReason: REFRESH_TOKEN_REVOKE_REASON.EXPIRED,
       },
     );
   }

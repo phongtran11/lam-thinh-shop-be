@@ -1,32 +1,67 @@
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
-import { PermissionEnum } from 'src/shared/enums/permissions.enum';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { EPermissions } from 'src/shared/constants/permission.constant';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
-  @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
+  @Column({
+    name: 'email',
+    type: 'varchar',
+    length: 255,
+    unique: true,
+    comment: 'The email of the user',
+  })
   email: string;
 
-  @Column({ name: 'password', type: 'varchar', length: 60 })
+  @Column({
+    name: 'password',
+    type: 'varchar',
+    length: 60,
+    comment: 'The hashed password of the user',
+  })
   password: string;
 
-  @Column({ name: 'first_name', type: 'varchar', length: 64, nullable: true })
+  @Column({
+    name: 'first_name',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    comment: 'The first name of the user',
+  })
   firstName: string;
 
-  @Column({ name: 'last_name', type: 'varchar', length: 64, nullable: true })
+  @Column({
+    name: 'last_name',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    comment: 'The last name of the user',
+  })
   lastName: string;
 
-  @Column({ name: 'phone_number', type: 'varchar', length: 20, nullable: true })
+  @Column({
+    name: 'phone_number',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    comment: 'The phone number of the user',
+  })
   phoneNumber: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'The avatar of the user',
+  })
   avatar: string;
 
   @Column({
     name: 'role_id',
     type: 'uuid',
+    comment: 'The role ID of the user',
   })
   roleId: string;
 
@@ -53,11 +88,11 @@ export class User extends BaseEntity {
     return `${this.firstName || ''} ${this.lastName || ''}`.trim();
   }
 
-  hasPermission(permission: PermissionEnum): boolean {
+  hasPermission(permission: EPermissions): boolean {
     return this.role?.permissions?.some((p) => p.name === permission) || false;
   }
 
-  hasAnyPermission(permissions: PermissionEnum[]): boolean {
+  hasAnyPermission(permissions: EPermissions[]): boolean {
     return permissions.some((permission) => this.hasPermission(permission));
   }
 
