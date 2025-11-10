@@ -1,11 +1,13 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
 import { Logger, LoggerErrorInterceptor } from 'pino-nestjs';
+import { ConfigService } from '@nestjs/config';
+import { TConfigs } from './configs/configs.type';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,27 +28,33 @@ async function bootstrap() {
     }),
   );
 
-  const version = 'v1';
-  const routePrefix = `api/${version}`;
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
+
+  const routePrefix = 'api';
 
   app.setGlobalPrefix(routePrefix);
 
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
+    .setTitle('API Documentation v1')
     .addBearerAuth()
     .addSecurityRequirements('bearer')
-    .setVersion(version)
+    .setVersion('1.0')
     .build();
-
   const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(`${routePrefix}/v1/docs`, app, document);
 
-  SwaggerModule.setup(`${routePrefix}/docs`, app, document);
+  const appPort = app
+    .get(ConfigService<TConfigs>)
+    .getOrThrow('common.appPort', { infer: true });
 
-  await app.listen(process.env.APP_PORT ?? 3000, () => {
+  await app.listen(appPort, () => {
     app
       .get(Logger)
       .log(
-        `Application is running on: http://localhost:${process.env.APP_PORT ?? 3000}/${routePrefix}`,
+        `Application is running on: http://localhost:${appPort}/api/v1/docs`,
       );
   });
 }

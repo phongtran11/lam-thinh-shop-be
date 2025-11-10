@@ -3,13 +3,13 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../../modules/auth/dto/jwt-payload.dto';
 import { TokenDto } from '../../modules/auth/dto/token.dto';
 import { ConfigService } from '@nestjs/config';
-import { Configs } from 'src/configs/configs.type';
+import { TConfigs } from 'src/configs/configs.type';
 
 @Injectable()
 export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService<Configs>,
+    private readonly configService: ConfigService<TConfigs>,
   ) {}
 
   async generateTokens(jwtPayload: JwtPayload): Promise<TokenDto> {

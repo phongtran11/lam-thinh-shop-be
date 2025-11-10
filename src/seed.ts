@@ -2,16 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 import { User } from './modules/users/entities/user.entity';
-import { Role } from './modules/roles/entities/role.entity';
-import { Permission } from './modules/roles/entities/permission.entity';
-
-import { PermissionRepository } from './modules/roles/repositories/permission.repository';
-import { RoleRepository } from './modules/roles/repositories/role.repository';
 import { UsersRepository } from './modules/users/repositories/users.repository';
 import { In } from 'typeorm';
 import { EncryptionService } from './shared/services/encryption.service';
 import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
-import { RolePermissionsRepository } from './modules/roles/repositories/role-permissions.repository';
 import {
   ERoles,
   ROLE_DESCRIPTION,
@@ -23,6 +17,11 @@ import {
   PERMISSIONS,
   RESOURCES,
 } from './shared/constants/permission.constant';
+import { Role } from './modules/roles-permissions/entities/role.entity';
+import { Permission } from './modules/roles-permissions/entities/permission.entity';
+import { PermissionRepository } from './modules/roles-permissions/repositories/permission.repository';
+import { RolePermissionsRepository } from './modules/roles-permissions/repositories/role-permissions.repository';
+import { RoleRepository } from './modules/roles-permissions/repositories/role.repository';
 
 const initUsers: Array<Partial<User> & { roleName: ERoles }> = [
   {

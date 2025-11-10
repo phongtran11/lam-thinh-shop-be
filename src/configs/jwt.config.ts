@@ -8,7 +8,7 @@ export const jwtAccessTokenOptions = {
   expiredIn: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRATION ?? ''),
 };
 
-export type JwtAccessTokenOptions = typeof jwtAccessTokenOptions;
+export type TJwtAccessTokenOptions = typeof jwtAccessTokenOptions;
 
 export const jwtAccessTokenConfig = registerAs(
   JWT_ACCESS_TOKEN_CONFIG,
@@ -20,7 +20,7 @@ export const refreshJwtOptions = {
   expiredIn: parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRATION ?? ''),
 };
 
-export type RefreshJwtOptions = typeof refreshJwtOptions;
+export type TRefreshJwtOptions = typeof refreshJwtOptions;
 
 export const jwtRefreshTokenConfig = registerAs(
   JWT_REFRESH_TOKEN_CONFIG,

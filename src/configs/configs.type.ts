@@ -1,15 +1,17 @@
+import { COMMON_CONFIG, TCommonConfig } from './common.config';
 import { DATABASE } from './database.config';
 import {
   JWT_ACCESS_TOKEN_CONFIG,
   JWT_REFRESH_TOKEN_CONFIG,
-  JwtAccessTokenOptions,
-  RefreshJwtOptions,
+  TJwtAccessTokenOptions,
+  TRefreshJwtOptions,
 } from './jwt.config';
 
-export type Configs = {
+export type TConfigs = {
   [DATABASE]: {
     url: string;
   };
-  [JWT_ACCESS_TOKEN_CONFIG]: JwtAccessTokenOptions;
-  [JWT_REFRESH_TOKEN_CONFIG]: RefreshJwtOptions;
+  [COMMON_CONFIG]: TCommonConfig;
+  [JWT_ACCESS_TOKEN_CONFIG]: TJwtAccessTokenOptions;
+  [JWT_REFRESH_TOKEN_CONFIG]: TRefreshJwtOptions;
 };

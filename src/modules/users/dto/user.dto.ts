@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { RoleDto } from 'src/modules/roles-permissions/dto/role.dto';
 import { BaseResponse } from 'src/shared/dto/response.dto';
 
 @Exclude()
@@ -31,4 +32,12 @@ export class UserDto extends BaseResponse {
   @Expose()
   @ApiProperty({ example: 'fcdbf758-3eb3-429a-b1c3-1234567890ab' })
   roleId: string;
+}
+
+@Exclude()
+export class UserWithRoleDto extends UserDto {
+  @Expose()
+  @ApiProperty({ type: RoleDto })
+  @Type(() => RoleDto)
+  role: RoleDto;
 }

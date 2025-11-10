@@ -11,7 +11,7 @@ import { EncryptionService } from '../../../shared/services/encryption.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { plainToInstance } from 'class-transformer';
 import { JwtPayload } from '../dto/jwt-payload.dto';
-import { UserDto } from '../../users/dto/user.dto';
+import { UserWithRoleDto } from '../../users/dto/user.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
 import { RegisterDto } from '../dto/register.dto';
 import { RegisterTransaction } from '../transactions/register.transaction';
@@ -23,8 +23,8 @@ import { GetMeResponseDto } from '../dto/me.dto';
 import { ClsService } from 'nestjs-cls';
 import { REFRESH_TOKEN_REVOKE_REASON } from 'src/shared/constants/auth.constant';
 import { CLS_KEY } from 'src/shared/constants/cls.constant';
-import { RoleRepository } from 'src/modules/roles/repositories/role.repository';
 import { ROLES } from 'src/shared/constants/role.constant';
+import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
 
 @Injectable()
 export class AuthService {
@@ -41,10 +41,13 @@ export class AuthService {
     private readonly roleRepository: RoleRepository,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<UserDto> {
-    const user = await this.usersRepository.findOneByEmail(email);
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserWithRoleDto> {
+    const user = await this.usersRepository.findOneWithRoleByEmail(email);
 
-    if (!user) return plainToInstance(UserDto, null);
+    if (!user) return plainToInstance(UserWithRoleDto, null);
 
     const isCorrectPassword = await this.encryptionService.compare(
       password,
@@ -52,9 +55,9 @@ export class AuthService {
     );
 
     if (user && isCorrectPassword) {
-      return plainToInstance(UserDto, user);
+      return plainToInstance(UserWithRoleDto, user);
     }
-    return plainToInstance(UserDto, null);
+    return plainToInstance(UserWithRoleDto, null);
   }
 
   async login(user: JwtPayload): Promise<TokenDto> {
@@ -138,7 +141,7 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      roleId: user.roleId,
+      roleName: user.role.name,
     };
 
     const newTokens = await this.tokenService.generateTokens(payload);

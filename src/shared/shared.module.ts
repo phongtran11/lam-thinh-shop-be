@@ -5,10 +5,9 @@ import { EncryptionService } from './services/encryption.service';
 import { TokenService } from './services/token.service';
 import { RolesGuard } from './guards/roles.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
-import { RoleRepository } from 'src/modules/roles/repositories/role.repository';
-import { PermissionRepository } from 'src/modules/roles/repositories/permission.repository';
-import { RolePermissionsRepository } from 'src/modules/roles/repositories/role-permissions.repository';
-
+import { PermissionRepository } from 'src/modules/roles-permissions/repositories/permission.repository';
+import { RolePermissionsRepository } from 'src/modules/roles-permissions/repositories/role-permissions.repository';
+import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
 @Module({
   imports: [ConfigModule, JwtModule.register({})],
   providers: [

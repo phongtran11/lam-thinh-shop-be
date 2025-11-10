@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { RolesModule } from './modules/roles/roles.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { databaseConfig } from './configs/database.config';
 import {
@@ -16,43 +15,31 @@ import { LogMiddleWare } from './shared/middlewares/log.middleware';
 import { ClsModule } from 'nestjs-cls';
 import { RolesGuard } from './shared/guards/roles.guard';
 import { PermissionsGuard } from './shared/guards/permissions.guard';
-import { LoggerModule } from 'pino-nestjs';
+import { PinoLoggerModule } from './shared/pino-logger/pino-logger.module';
+import { commonConfig } from './configs/common.config';
+import { RolesPermissionsModule } from './modules/roles-permissions/roles-permissions.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtAccessTokenConfig, jwtRefreshTokenConfig],
+      load: [
+        databaseConfig,
+        jwtAccessTokenConfig,
+        jwtRefreshTokenConfig,
+        commonConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true },
     }),
-
-    LoggerModule.forRoot({
-      pinoHttp: {
-        redact: {
-          paths: ['req.headers.authorization', 'req.headers.cookie'],
-          censor: '*****',
-        },
-        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
-        transport: {
-          targets: [
-            {
-              level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
-              target: 'pino-pretty',
-              options: { color: true },
-            },
-          ],
-        },
-      },
-      forRoutes: ['*path'],
-    }),
+    PinoLoggerModule.forRoot(),
 
     // MODULES
     AuthModule,
-    RolesModule,
+    RolesPermissionsModule,
     UsersModule,
     SchedulesModule,
   ],

@@ -29,4 +29,4 @@ import { RolePermissionsRepository } from './repositories/role-permissions.repos
     RolePermissionsRepository,
   ],
 })
-export class RolesModule {}
+export class RolesPermissionsModule {}

@@ -7,7 +7,7 @@ import {
   ApiInternalServerErrorResponseCustom,
   ApiResponseCustom,
 } from 'src/shared/decorators/swagger.decorator';
-import { RoleDto } from '../dto/role.dto';
+import { RoleWithPermissionsDto } from '../dto/role.dto';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -18,10 +18,10 @@ export class RoleController {
 
   @Get()
   @Public()
-  @ApiResponseCustom(RoleDto, {
+  @ApiResponseCustom(RoleWithPermissionsDto, {
     isArray: true,
   })
-  async getRoles(): Promise<RoleDto[]> {
+  async getRoles(): Promise<RoleWithPermissionsDto[]> {
     return this.roleService.getRoles();
   }
 }

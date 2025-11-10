@@ -32,7 +32,7 @@ export class RegisterTransaction extends BaseTransaction {
     const jwtPayload: JwtPayload = {
       sub: newUser.id,
       email: newUser.email,
-      roleId: newUser.roleId,
+      roleName: newUser.role.name,
     };
 
     const tokens = await this.tokenService.generateTokens(jwtPayload);

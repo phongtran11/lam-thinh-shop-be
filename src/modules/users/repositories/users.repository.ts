@@ -16,37 +16,19 @@ export class UsersRepository extends BaseRepository<User> {
   async findOneByEmail(email: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
       .where('user.email = :email', { email })
-      .select([
-        'user.id',
-        'user.email',
-        'user.firstName',
-        'user.lastName',
-        'user.phoneNumber',
-        'user.password',
-        'user.avatar',
-        'user.roleId',
-        'user.createdAt',
-        'user.updatedAt',
-        'user.deletedAt',
-      ])
+      .getOne();
+  }
+
+  async findOneWithRoleByEmail(email: string): Promise<User | null> {
+    return await this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.email = :email', { email })
       .getOne();
   }
 
   async findOneByUserId(id: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
       .where('user.id = :id', { id })
-      .select([
-        'user.id',
-        'user.email',
-        'user.firstName',
-        'user.lastName',
-        'user.phoneNumber',
-        'user.avatar',
-        'user.roleId',
-        'user.createdAt',
-        'user.updatedAt',
-        'user.deletedAt',
-      ])
       .getOne();
   }
 
@@ -54,18 +36,6 @@ export class UsersRepository extends BaseRepository<User> {
     return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :id', { id })
-      .select([
-        'user.id',
-        'user.email',
-        'user.firstName',
-        'user.lastName',
-        'user.phoneNumber',
-        'user.roleId',
-        'user.createdAt',
-        'user.updatedAt',
-        'user.deletedAt',
-        'role',
-      ])
       .getOne();
   }
 
@@ -82,21 +52,17 @@ export class UsersRepository extends BaseRepository<User> {
         { isActive: true },
       )
       .where('user.id = :id', { id })
-      .select([
-        'user.id',
-        'user.email',
-        'user.firstName',
-        'user.lastName',
-        'user.phoneNumber',
-        'user.avatar',
-        'user.roleId',
-        'user.createdAt',
-        'user.updatedAt',
-        'user.deletedAt',
-        'role',
-        'rolePermissions',
-        'permission',
-      ])
+
       .getOne();
+  }
+
+  async findUsersByCondition(
+    skip: number,
+    take: number,
+  ): Promise<[User[], number]> {
+    return await this.createQueryBuilder('user')
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
   }
 }
