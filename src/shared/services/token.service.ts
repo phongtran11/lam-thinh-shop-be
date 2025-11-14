@@ -21,7 +21,8 @@ export class TokenService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: this.getAccessTokenExpirationDate(),
+      accessTokenExpiresIn: this.getAccessTokenExpirationDate(),
+      refreshTokenExpiresIn: this.getRefreshTokenExpirationDate(),
     };
   }
 

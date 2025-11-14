@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { BaseRepository } from 'src/shared/repositories/base.repository';
-import { DataSource } from 'typeorm';
+import { Brackets, DataSource } from 'typeorm';
+import { ROLES } from 'src/shared/constants/role.constant';
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
@@ -52,7 +53,6 @@ export class UsersRepository extends BaseRepository<User> {
         { isActive: true },
       )
       .where('user.id = :id', { id })
-
       .getOne();
   }
 
@@ -64,5 +64,36 @@ export class UsersRepository extends BaseRepository<User> {
       .skip(skip)
       .take(take)
       .getManyAndCount();
+  }
+
+  async findCustomersByCondition(
+    skip: number,
+    take: number,
+    search?: string,
+  ): Promise<[User[], number]> {
+    const qb = this.createQueryBuilder('user')
+      .leftJoin('user.role', 'role')
+      .where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((qb) => {
+          qb.where('LOWER(user.firstName) LIKE LOWER(:search)', {
+            search: `%${search}%`,
+          })
+            .orWhere('LOWER(user.lastName) LIKE LOWER(:search)', {
+              search: `%${search}%`,
+            })
+            .orWhere('LOWER(user.email) LIKE LOWER(:search)', {
+              search: `%${search}%`,
+            })
+            .orWhere('user.phoneNumber LIKE :search', {
+              search: `%${search}%`,
+            });
+        }),
+      );
+    }
+
+    return qb.skip(skip).take(take).getManyAndCount();
   }
 }

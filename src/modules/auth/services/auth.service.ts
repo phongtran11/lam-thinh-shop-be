@@ -129,7 +129,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    const user = await this.usersRepository.findOneByUserId(tokenEntity.userId);
+    const user = await this.usersRepository.findOneWithRolePermissionsById(
+      tokenEntity.userId,
+    );
     if (!user) {
       await this.refreshTokensRepository.revokeTokenById(
         tokenEntity.id,

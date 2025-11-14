@@ -19,5 +19,11 @@ export class TokenDto {
     example: new Date(),
   })
   @Expose()
-  expiresIn: Date;
+  accessTokenExpiresIn: Date;
+
+  @ApiProperty({
+    example: new Date(),
+  })
+  @Expose()
+  refreshTokenExpiresIn: Date;
 }
