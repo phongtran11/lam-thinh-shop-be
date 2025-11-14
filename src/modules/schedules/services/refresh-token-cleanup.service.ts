@@ -19,7 +19,7 @@ export class RefreshTokenCleanupService {
    * - Already revoked tokens
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
-    name: CRONJOB_NAME.REFRESH_TOKEN_CLEANUP as string,
+    name: CRONJOB_NAME.REFRESH_TOKEN_CLEANUP,
     timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleCleanupInactiveTokens() {
