@@ -6,10 +6,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from 'src/shared/decorators/roles.decorator';
-import { User } from 'src/modules/users/entities/user.entity';
-import { ERoles, ROLE_HIERARCHY } from '../constants/role.constant';
 import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
+import { User } from 'src/modules/users/entities/user.entity';
+import { ERoles, ROLE_HIERARCHY } from 'src/shared/constants/role.constant';
+import { ROLES_KEY } from 'src/shared/decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

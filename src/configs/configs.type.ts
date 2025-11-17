@@ -3,8 +3,8 @@ import { DATABASE } from './database.config';
 import {
   JWT_ACCESS_TOKEN_CONFIG,
   JWT_REFRESH_TOKEN_CONFIG,
-  TJwtAccessTokenOptions,
-  TRefreshJwtOptions,
+  TJwtAccessTokenConfig,
+  TJwtRefreshTokenConfig,
 } from './jwt.config';
 
 export type TConfigs = {
@@ -12,6 +12,6 @@ export type TConfigs = {
     url: string;
   };
   [COMMON_CONFIG]: TCommonConfig;
-  [JWT_ACCESS_TOKEN_CONFIG]: TJwtAccessTokenOptions;
-  [JWT_REFRESH_TOKEN_CONFIG]: TRefreshJwtOptions;
+  [JWT_ACCESS_TOKEN_CONFIG]: TJwtAccessTokenConfig;
+  [JWT_REFRESH_TOKEN_CONFIG]: TJwtRefreshTokenConfig;
 };

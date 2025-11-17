@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Exclude()
 export class LoginDto {

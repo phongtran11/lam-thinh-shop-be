@@ -1,8 +1,8 @@
+import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
+import { PermissionDto } from '../dtos/permission.dto';
 import { PermissionRepository } from '../repositories/permission.repository';
-import { PermissionDto } from '../dto/permission.dto';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class PermissionService {

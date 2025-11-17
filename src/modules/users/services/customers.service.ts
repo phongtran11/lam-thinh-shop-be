@@ -1,7 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { UsersRepository } from '../repositories/users.repository';
-import { ListUserDto, ListUserQueryParamsDto } from '../dto/list-user.dto';
 import { plainToInstance } from 'class-transformer';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  ListUserDto,
+  ListUserQueryParamsDto,
+} from 'src/modules/users/dtos/list-user.dto';
+import { UsersRepository } from 'src/modules/users/repositories/users.repository';
 
 @Injectable()
 export class CustomersService {

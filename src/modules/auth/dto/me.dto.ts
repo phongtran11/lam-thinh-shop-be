@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { RoleWithPermissionsDto } from 'src/modules/roles-permissions/dto/role.dto';
-import { UserDto } from 'src/modules/users/dto/user.dto';
+import { RoleWithPermissionsDto } from 'src/modules/roles-permissions/dtos/role.dto';
+import { UserDto } from 'src/modules/users/dtos/user.dto';
 
 @Exclude()
 export class GetMeResponseDto extends UserDto {

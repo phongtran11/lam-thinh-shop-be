@@ -1,13 +1,13 @@
+import { ClsService } from 'nestjs-cls';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
+import { PinoLogger } from 'pino-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
 import { TConfigs } from 'src/configs/configs.type';
-import { ClsService } from 'nestjs-cls';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { PinoLogger } from 'pino-nestjs';
-import { CLS_KEY } from '../constants/cls.constant';
+import { CLS_KEY } from 'src/shared/constants/cls.constant';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.getOrThrow('jwtAccessToken.secret', {
+      secretOrKey: configService.getOrThrow('jwtAccessTokenConfig.secret', {
         infer: true,
       }),
     });

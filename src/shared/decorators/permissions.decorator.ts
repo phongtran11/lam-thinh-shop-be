@@ -1,5 +1,8 @@
 import { SetMetadata } from '@nestjs/common';
-import { EPermissions, PERMISSIONS } from '../constants/permission.constant';
+import {
+  EPermissions,
+  PERMISSIONS,
+} from 'src/shared/constants/permission.constant';
 
 export const PERMISSIONS_KEY = 'permissions';
 export const Permissions = (...permissions: EPermissions[]) =>

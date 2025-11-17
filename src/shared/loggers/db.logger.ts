@@ -1,5 +1,5 @@
-import { Logger as NestLogger } from '@nestjs/common';
 import { Logger } from 'typeorm';
+import { Logger as NestLogger } from '@nestjs/common';
 
 export class DatabaseLogger implements Logger {
   private readonly logger = new NestLogger('TypeORM');

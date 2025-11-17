@@ -1,28 +1,28 @@
 import { registerAs } from '@nestjs/config';
 
-export const JWT_ACCESS_TOKEN_CONFIG = 'jwtAccessToken';
-export const JWT_REFRESH_TOKEN_CONFIG = 'jwtRefreshToken';
+export const JWT_ACCESS_TOKEN_CONFIG = 'jwtAccessTokenConfig';
+export const JWT_REFRESH_TOKEN_CONFIG = 'jwtRefreshTokenConfig';
 
-export const jwtAccessTokenOptions = {
+export const jwtAccessTokenMap = {
   secret: process.env.JWT_ACCESS_TOKEN_SECRET,
   expiredIn: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRATION ?? ''),
 };
 
-export type TJwtAccessTokenOptions = typeof jwtAccessTokenOptions;
+export type TJwtAccessTokenConfig = typeof jwtAccessTokenMap;
 
 export const jwtAccessTokenConfig = registerAs(
   JWT_ACCESS_TOKEN_CONFIG,
-  () => jwtAccessTokenOptions,
+  () => jwtAccessTokenMap,
 );
 
-export const refreshJwtOptions = {
+export const jwtRefreshTokenMap = {
   secret: process.env.JWT_REFRESH_TOKEN_SECRET,
   expiredIn: parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRATION ?? ''),
 };
 
-export type TRefreshJwtOptions = typeof refreshJwtOptions;
+export type TJwtRefreshTokenConfig = typeof jwtRefreshTokenMap;
 
 export const jwtRefreshTokenConfig = registerAs(
   JWT_REFRESH_TOKEN_CONFIG,
-  () => refreshJwtOptions,
+  () => jwtRefreshTokenMap,
 );

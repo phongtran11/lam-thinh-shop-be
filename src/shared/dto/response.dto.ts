@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { AuditUserInfoDto } from './audit-user-info.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { AuditUserInfoDto } from 'src/shared/dto/audit-user-info.dto';
 
 export class SuccessResponseDto<T> {
   @ApiProperty({

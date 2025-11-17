@@ -1,15 +1,15 @@
-import { BaseTransaction } from 'src/shared/providers/transaction.provider';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { User } from 'src/modules/users/entities/user.entity';
-import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
-import { TokenDto } from '../dto/token.dto';
-import { TokenService } from 'src/shared/services/token.service';
-import { JwtPayload } from '../dto/jwt-payload.dto';
 import { Injectable } from '@nestjs/common';
-import { RefreshToken } from '../entities/refresh-token.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { TokenDto } from 'src/modules/auth/dto/token.dto';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
+import { User } from 'src/modules/users/entities/user.entity';
+import { UsersRepository } from 'src/modules/users/repositories/users.repository';
+import { BaseTransaction } from 'src/shared/providers/transaction.provider';
 import { EncryptionService } from 'src/shared/services/encryption.service';
+import { TokenService } from 'src/shared/services/token.service';
 
 @Injectable()
 export class RegisterTransaction extends BaseTransaction {

@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import {
   IsEmail,
@@ -7,6 +6,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Match } from 'src/shared/decorators/match.decorator';
 
 @Exclude()

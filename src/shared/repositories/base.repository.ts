@@ -1,4 +1,3 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import {
   DataSource,
   DeepPartial,
@@ -16,6 +15,7 @@ import {
   UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity.js';
+import { InternalServerErrorException } from '@nestjs/common';
 
 export class BaseRepository<
   Entity extends ObjectLiteral,

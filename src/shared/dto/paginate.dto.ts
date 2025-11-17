@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsOptional, IsNumber, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Exclude()
 export class PaginationResponseDto {

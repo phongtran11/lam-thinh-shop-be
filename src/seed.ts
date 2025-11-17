@@ -1,27 +1,26 @@
+import { In } from 'typeorm';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-
+import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
+import { Permission } from './modules/roles-permissions/entities/permission.entity';
+import { Role } from './modules/roles-permissions/entities/role.entity';
+import { PermissionRepository } from './modules/roles-permissions/repositories/permission.repository';
+import { RolePermissionsRepository } from './modules/roles-permissions/repositories/role-permissions.repository';
+import { RoleRepository } from './modules/roles-permissions/repositories/role.repository';
 import { User } from './modules/users/entities/user.entity';
 import { UsersRepository } from './modules/users/repositories/users.repository';
-import { In } from 'typeorm';
-import { EncryptionService } from './shared/services/encryption.service';
-import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
+import {
+  EPermissions,
+  PERMISSIONS,
+  RESOURCES,
+} from './shared/constants/permission.constant';
 import {
   ERoles,
   ROLE_DESCRIPTION,
   ROLE_HIERARCHY,
   ROLES,
 } from './shared/constants/role.constant';
-import {
-  EPermissions,
-  PERMISSIONS,
-  RESOURCES,
-} from './shared/constants/permission.constant';
-import { Role } from './modules/roles-permissions/entities/role.entity';
-import { Permission } from './modules/roles-permissions/entities/permission.entity';
-import { PermissionRepository } from './modules/roles-permissions/repositories/permission.repository';
-import { RolePermissionsRepository } from './modules/roles-permissions/repositories/role-permissions.repository';
-import { RoleRepository } from './modules/roles-permissions/repositories/role.repository';
+import { EncryptionService } from './shared/services/encryption.service';
 
 const initUsers: Array<Partial<User> & { roleName: ERoles }> = [
   {
@@ -508,7 +507,7 @@ async function bootstrap() {
   console.log('✅ Existing data cleared\n');
 
   // Upsert permissions
-  console.log('📋 Seeding EPermissions...');
+  console.log('📋 Seeding Permissions...');
   const permissions = initPermissions.map((permission) =>
     permissionRepository.create(permission),
   );

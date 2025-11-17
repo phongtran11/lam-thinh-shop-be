@@ -1,10 +1,10 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { registerAs } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DatabaseLogger } from 'src/shared/loggers/db.logger';
 import { BaseEntitySubscriber } from 'src/shared/subscribers/base-entity.subscriber';
 
-export const DATABASE = 'database';
+export const DATABASE = 'databaseConfig';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',

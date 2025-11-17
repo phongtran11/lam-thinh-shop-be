@@ -16,7 +16,7 @@ import {
   NotFoundResponseDto,
   SuccessResponseDto,
   UnauthorizedResponseDto,
-} from '../dto/response.dto';
+} from 'src/shared/dto/response.dto';
 
 export const ApiResponseCustom = <T extends Type<any>>(
   data: T,

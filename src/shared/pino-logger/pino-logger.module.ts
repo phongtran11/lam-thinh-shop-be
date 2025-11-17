@@ -1,13 +1,13 @@
+import { LoggerModule } from 'pino-nestjs';
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LoggerModule } from 'pino-nestjs';
 import { TConfigs } from 'src/configs/configs.type';
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
       useFactory: (configService: ConfigService<TConfigs>) => {
-        const appEnv = configService.getOrThrow('common.appEnv', {
+        const appEnv = configService.getOrThrow('commonConfig.appEnv', {
           infer: true,
         });
         return {
@@ -35,7 +35,7 @@ import { TConfigs } from 'src/configs/configs.type';
   ],
 })
 export class PinoLoggerModule {
-  static forRoot(): DynamicModule {
+  static forRootAsync(): DynamicModule {
     return {
       module: PinoLoggerModule,
     };

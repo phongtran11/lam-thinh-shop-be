@@ -1,10 +1,10 @@
+import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { RefreshToken } from '../entities/refresh-token.entity';
-import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
-import { BaseTransaction } from 'src/shared/providers/transaction.provider';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { REFRESH_TOKEN_REVOKE_REASON } from 'src/shared/constants/auth.constant';
+import { BaseTransaction } from 'src/shared/providers/transaction.provider';
 
 @Injectable()
 export class RefreshTokenTransaction extends BaseTransaction {

@@ -1,8 +1,8 @@
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { EPermissions } from 'src/shared/constants/permission.constant';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { Role } from 'src/modules/roles-permissions/entities/role.entity';
+import { EPermissions } from 'src/shared/constants/permission.constant';
+import { BaseEntity } from 'src/shared/entities/base.entity';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {

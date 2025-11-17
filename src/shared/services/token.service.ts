@@ -1,9 +1,10 @@
+import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from '../../modules/auth/dto/jwt-payload.dto';
-import { TokenDto } from '../../modules/auth/dto/token.dto';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { TConfigs } from 'src/configs/configs.type';
+import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { TokenDto } from 'src/modules/auth/dto/token.dto';
 
 @Injectable()
 export class TokenService {
@@ -18,39 +19,45 @@ export class TokenService {
       this.generateRefreshToken(jwtPayload),
     ]);
 
-    return {
+    return plainToInstance(TokenDto, {
       accessToken,
       refreshToken,
       accessTokenExpiresIn: this.getAccessTokenExpirationDate(),
       refreshTokenExpiresIn: this.getRefreshTokenExpirationDate(),
-    };
+    });
   }
 
   generateAccessToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('jwtAccessToken.secret', {
+      secret: this.configService.getOrThrow('jwtAccessTokenConfig.secret', {
         infer: true,
       }),
-      expiresIn: this.configService.getOrThrow('jwtAccessToken.expiredIn', {
-        infer: true,
-      }),
+      expiresIn: this.configService.getOrThrow(
+        'jwtAccessTokenConfig.expiredIn',
+        {
+          infer: true,
+        },
+      ),
     });
   }
 
   generateRefreshToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('jwtRefreshToken.secret', {
+      secret: this.configService.getOrThrow('jwtRefreshTokenConfig.secret', {
         infer: true,
       }),
-      expiresIn: this.configService.getOrThrow('jwtRefreshToken.expiredIn', {
-        infer: true,
-      }),
+      expiresIn: this.configService.getOrThrow(
+        'jwtRefreshTokenConfig.expiredIn',
+        {
+          infer: true,
+        },
+      ),
     });
   }
 
   getRefreshTokenExpirationDate(): Date {
     const expiresIn = this.configService.getOrThrow(
-      'jwtRefreshToken.expiredIn',
+      'jwtRefreshTokenConfig.expiredIn',
       {
         infer: true,
       },
@@ -63,7 +70,7 @@ export class TokenService {
 
   getAccessTokenExpirationDate(): Date {
     const expiresIn = this.configService.getOrThrow(
-      'jwtAccessToken.expiredIn',
+      'jwtAccessTokenConfig.expiredIn',
       {
         infer: true,
       },

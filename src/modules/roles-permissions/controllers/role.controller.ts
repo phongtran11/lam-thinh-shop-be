@@ -1,13 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { RoleService } from '../services/role.service';
+import { RoleWithPermissionsDto } from 'src/modules/roles-permissions/dtos/role.dto';
+import { RoleService } from 'src/modules/roles-permissions/services/role.service';
 import { Public } from 'src/shared/decorators/public.decorator';
 import {
   ApiBadRequestResponseCustom,
   ApiInternalServerErrorResponseCustom,
   ApiResponseCustom,
 } from 'src/shared/decorators/swagger.decorator';
-import { RoleWithPermissionsDto } from '../dto/role.dto';
 
 @ApiTags('Roles')
 @Controller('roles')

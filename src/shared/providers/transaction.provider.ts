@@ -1,5 +1,5 @@
 import { DataSource, QueryRunner } from 'typeorm';
-import { BaseRepository } from '../repositories/base.repository';
+import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 /**
  * Base Transaction Class
@@ -8,6 +8,9 @@ import { BaseRepository } from '../repositories/base.repository';
  * - Auto transaction handling (begin/commit/rollback)
  * - Auto set/clear manager for all repositories
  * - Error handling and rollback on failure
+ *
+ * Note: All repositories used in transaction
+ * MUST be registered in constructor using registerRepository() to enable automatic transaction manager injection
  *
  * Usage:
  * class RegisterTransaction extends BaseTransaction {

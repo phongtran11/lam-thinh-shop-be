@@ -1,23 +1,23 @@
+import { ClsModule } from 'nestjs-cls';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './modules/users/users.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { SchedulesModule } from './modules/schedules/schedules.module';
-import { databaseConfig } from './configs/database.config';
+import { APP_GUARD } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { commonConfig } from 'src/configs/common.config';
+import { databaseConfig } from 'src/configs/database.config';
 import {
   jwtAccessTokenConfig,
   jwtRefreshTokenConfig,
-} from './configs/jwt.config';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
-import { LogMiddleWare } from './shared/middlewares/log.middleware';
-import { ClsModule } from 'nestjs-cls';
-import { RolesGuard } from './shared/guards/roles.guard';
-import { PermissionsGuard } from './shared/guards/permissions.guard';
-import { PinoLoggerModule } from './shared/pino-logger/pino-logger.module';
-import { commonConfig } from './configs/common.config';
-import { RolesPermissionsModule } from './modules/roles-permissions/roles-permissions.module';
+} from 'src/configs/jwt.config';
+import { AuthModule } from 'src/modules/auth/auth.module';
+import { RolesPermissionsModule } from 'src/modules/roles-permissions/roles-permissions.module';
+import { SchedulesModule } from 'src/modules/schedules/schedules.module';
+import { UsersModule } from 'src/modules/users/users.module';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/shared/guards/permissions.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { LogMiddleWare } from 'src/shared/middlewares/log.middleware';
+import { PinoLoggerModule } from 'src/shared/pino-logger/pino-logger.module';
 
 @Module({
   imports: [
@@ -35,7 +35,7 @@ import { RolesPermissionsModule } from './modules/roles-permissions/roles-permis
       global: true,
       middleware: { mount: true },
     }),
-    PinoLoggerModule.forRoot(),
+    PinoLoggerModule.forRootAsync(),
 
     // MODULES
     AuthModule,

@@ -1,14 +1,13 @@
+import { LessThan, UpdateResult } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { LessThan, UpdateResult } from 'typeorm';
-import { RefreshToken } from '../entities/refresh-token.entity';
-
-import { BaseRepository } from 'src/shared/repositories/base.repository';
-import { DataSource } from 'typeorm';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import {
   ERefreshTokenRevokeReason,
   REFRESH_TOKEN_REVOKE_REASON,
 } from 'src/shared/constants/auth.constant';
+import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
 export class RefreshTokensRepository extends BaseRepository<RefreshToken> {

@@ -1,10 +1,13 @@
 import { Controller, Post, UseGuards, Body, Req, Get } from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
-import { LocalAuthGuard } from '../../../shared/guards/local-auth.guard';
-import { TokenDto } from '../dto/token.dto';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { RegisterDto } from '../dto/register.dto';
-import { LoginDto } from '../dto/login.dto';
+import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
+import { GetMeResponseDto } from 'src/modules/auth/dto/me.dto';
+import { RefreshTokenRequestDto } from 'src/modules/auth/dto/refresh-token.dto';
+import { RegisterDto } from 'src/modules/auth/dto/register.dto';
+import { TokenDto } from 'src/modules/auth/dto/token.dto';
+import { AuthService } from 'src/modules/auth/services/auth.service';
 import { Public } from 'src/shared/decorators/public.decorator';
 import {
   ApiBadRequestResponseCustom,
@@ -12,10 +15,7 @@ import {
   ApiResponseCustom,
   ApiUnauthorizedResponseCustom,
 } from 'src/shared/decorators/swagger.decorator';
-import { RefreshTokenRequestDto } from '../dto/refresh-token.dto';
-import { LogoutDto } from '../dto/logout.dto';
-import { JwtPayload } from '../dto/jwt-payload.dto';
-import { GetMeResponseDto } from '../dto/me.dto';
+import { LocalAuthGuard } from 'src/shared/guards/local-auth.guard';
 
 @Controller('auth')
 @ApiTags('Auth')

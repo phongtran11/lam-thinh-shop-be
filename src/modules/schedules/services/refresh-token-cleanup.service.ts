@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { CRONJOB_NAME } from '../constants/cronjob-name.constant';
 
 @Injectable()

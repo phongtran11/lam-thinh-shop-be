@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { Role } from './role.entity';
-import { Permission } from './permission.entity';
+import { Permission } from 'src/modules/roles-permissions/entities/permission.entity';
+import { Role } from 'src/modules/roles-permissions/entities/role.entity';
 
 @Entity('role_permissions')
 export class RolePermissions {

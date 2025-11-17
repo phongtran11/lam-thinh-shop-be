@@ -6,9 +6,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from 'src/shared/decorators/permissions.decorator';
 import { User } from 'src/modules/users/entities/user.entity';
-import { EPermissions } from '../constants/permission.constant';
+import { EPermissions } from 'src/shared/constants/permission.constant';
+import { PERMISSIONS_KEY } from 'src/shared/decorators/permissions.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -38,7 +38,7 @@ export class PermissionsGuard implements CanActivate {
 
     if (!hasAllPermissions) {
       throw new ForbiddenException(
-        `User ${user.email} attempted to access resource requiring permissions: ${requiredPermissions.join(',')}`,
+        `User ${user.email} attempted to access resource requiring permissions: ${requiredPermissions.join(', ')}`,
       );
     }
 

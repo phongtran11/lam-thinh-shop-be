@@ -1,9 +1,9 @@
+import { Brackets, DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
-import { Brackets, DataSource } from 'typeorm';
+import { User } from 'src/modules/users/entities/user.entity';
 import { ROLES } from 'src/shared/constants/role.constant';
+import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {

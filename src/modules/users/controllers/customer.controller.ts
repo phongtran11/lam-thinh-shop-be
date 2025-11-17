@@ -4,8 +4,8 @@ import {
   ApiBadRequestResponseCustom,
   ApiResponseCustom,
 } from 'src/shared/decorators/swagger.decorator';
+import { ListUserDto, ListUserQueryParamsDto } from '../dtos/list-user.dto';
 import { CustomersService } from '../services/customers.service';
-import { ListUserDto, ListUserQueryParamsDto } from '../dto/list-user.dto';
 
 @ApiTags('Customer')
 @Controller('customers')

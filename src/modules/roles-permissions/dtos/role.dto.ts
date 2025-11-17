@@ -1,8 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { BaseResponse } from 'src/shared/dto/response.dto';
-import { PermissionDto } from './permission.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PermissionDto } from 'src/modules/roles-permissions/dtos/permission.dto';
 import { ROLES, type ERoles } from 'src/shared/constants/role.constant';
+import { BaseResponse } from 'src/shared/dto/response.dto';
 
 @Exclude()
 export class RoleDto extends BaseResponse {

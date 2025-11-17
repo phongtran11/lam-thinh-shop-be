@@ -1,3 +1,4 @@
+import { ClsService } from 'nestjs-cls';
 import {
   EntitySubscriberInterface,
   EventSubscriber,
@@ -5,10 +6,9 @@ import {
   SoftRemoveEvent,
   UpdateEvent,
 } from 'typeorm';
-import { BaseEntity } from '../entities/base.entity';
-import { ClsService } from 'nestjs-cls';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
-import { CLS_KEY } from '../constants/cls.constant';
+import { CLS_KEY } from 'src/shared/constants/cls.constant';
+import { BaseEntity } from 'src/shared/entities/base.entity';
 
 @EventSubscriber()
 export class BaseEntitySubscriber

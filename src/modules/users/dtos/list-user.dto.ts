@@ -1,11 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserDto } from './user.dto';
+import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { UserDto } from 'src/modules/users/dtos/user.dto';
 import {
   PaginationRequestDto,
   PaginationResponseDto,
 } from 'src/shared/dto/paginate.dto';
-import { IsOptional, IsString } from 'class-validator';
 
 export class ListUserQueryParamsDto extends PaginationRequestDto {
   @ApiPropertyOptional({

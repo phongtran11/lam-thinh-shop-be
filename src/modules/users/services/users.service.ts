@@ -1,9 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { UsersRepository } from '../repositories/users.repository';
-import { ClsService } from 'nestjs-cls';
-import { EncryptionService } from 'src/shared/services/encryption.service';
-import { ListUserDto, ListUserQueryParamsDto } from '../dto/list-user.dto';
 import { plainToInstance } from 'class-transformer';
+import { ClsService } from 'nestjs-cls';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  ListUserDto,
+  ListUserQueryParamsDto,
+} from 'src/modules/users/dtos/list-user.dto';
+import { UsersRepository } from 'src/modules/users/repositories/users.repository';
+import { EncryptionService } from 'src/shared/services/encryption.service';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +18,7 @@ export class UsersService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async listUsers(query: ListUserQueryParamsDto) {
+  async listUsers(query: ListUserQueryParamsDto): Promise<ListUserDto> {
     const [users, totalUsers] = await this.usersRepository.findUsersByCondition(
       query.skip,
       query.limit,

@@ -1,12 +1,12 @@
 import { Entity, Column, OneToMany } from 'typeorm';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { Permission } from 'src/modules/roles-permissions/entities/permission.entity';
+import { RolePermissions } from 'src/modules/roles-permissions/entities/role-permissions.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { RolePermissions } from './role-permissions.entity';
-import { Permission } from './permission.entity';
 import {
   type ERoleHierarchy,
   type ERoles,
 } from 'src/shared/constants/role.constant';
+import { BaseEntity } from 'src/shared/entities/base.entity';
 
 @Entity('roles')
 export class Role extends BaseEntity {

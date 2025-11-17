@@ -1,3 +1,5 @@
+import { plainToInstance } from 'class-transformer';
+import { ClsService } from 'nestjs-cls';
 import {
   BadRequestException,
   ConflictException,
@@ -6,25 +8,23 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { TokenDto } from '../dto/token.dto';
-import { EncryptionService } from '../../../shared/services/encryption.service';
-import { TokenService } from '../../../shared/services/token.service';
-import { plainToInstance } from 'class-transformer';
-import { JwtPayload } from '../dto/jwt-payload.dto';
-import { UserWithRoleDto } from '../../users/dto/user.dto';
+import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
+import { GetMeResponseDto } from 'src/modules/auth/dto/me.dto';
+import { RefreshTokenRequestDto } from 'src/modules/auth/dto/refresh-token.dto';
+import { RegisterDto } from 'src/modules/auth/dto/register.dto';
+import { TokenDto } from 'src/modules/auth/dto/token.dto';
+import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
+import { RefreshTokenTransaction } from 'src/modules/auth/transactions/refresh-token.transaction';
+import { RegisterTransaction } from 'src/modules/auth/transactions/register.transaction';
+import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
+import { UserWithRoleDto } from 'src/modules/users/dtos/user.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { RegisterDto } from '../dto/register.dto';
-import { RegisterTransaction } from '../transactions/register.transaction';
-import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
-import { RefreshTokenRequestDto } from '../dto/refresh-token.dto';
-import { RefreshTokenTransaction } from '../transactions/refresh-token.transaction';
-import { LogoutDto } from '../dto/logout.dto';
-import { GetMeResponseDto } from '../dto/me.dto';
-import { ClsService } from 'nestjs-cls';
 import { REFRESH_TOKEN_REVOKE_REASON } from 'src/shared/constants/auth.constant';
 import { CLS_KEY } from 'src/shared/constants/cls.constant';
 import { ROLES } from 'src/shared/constants/role.constant';
-import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
+import { EncryptionService } from 'src/shared/services/encryption.service';
+import { TokenService } from 'src/shared/services/token.service';
 
 @Injectable()
 export class AuthService {

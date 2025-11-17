@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RoleRepository } from '../repositories/role.repository';
 import { plainToInstance } from 'class-transformer';
-import { RoleWithPermissionsDto } from '../dto/role.dto';
+import { Injectable, Logger } from '@nestjs/common';
+import { RoleWithPermissionsDto } from '../dtos/role.dto';
+import { RoleRepository } from '../repositories/role.repository';
 
 @Injectable()
 export class RoleService {
