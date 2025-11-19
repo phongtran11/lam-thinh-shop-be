@@ -13,7 +13,7 @@ export class ListUserQueryParamsDto extends PaginationRequestDto {
   })
   @IsString()
   @IsOptional()
-  search?: string;
+  keywords?: string;
 }
 
 @Exclude()

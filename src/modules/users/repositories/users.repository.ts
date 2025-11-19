@@ -69,26 +69,26 @@ export class UsersRepository extends BaseRepository<User> {
   async findCustomersByCondition(
     skip: number,
     take: number,
-    search?: string,
+    keywords?: string,
   ): Promise<[User[], number]> {
     const qb = this.createQueryBuilder('user')
       .leftJoin('user.role', 'role')
       .where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
 
-    if (search) {
+    if (keywords) {
       qb.andWhere(
         new Brackets((qb) => {
-          qb.where('LOWER(user.firstName) LIKE LOWER(:search)', {
-            search: `%${search}%`,
+          qb.where('LOWER(user.firstName) LIKE LOWER(:keywords)', {
+            keywords: `%${keywords}%`,
           })
-            .orWhere('LOWER(user.lastName) LIKE LOWER(:search)', {
-              search: `%${search}%`,
+            .orWhere('LOWER(user.lastName) LIKE LOWER(:keywords)', {
+              keywords: `%${keywords}%`,
             })
-            .orWhere('LOWER(user.email) LIKE LOWER(:search)', {
-              search: `%${search}%`,
+            .orWhere('LOWER(user.email) LIKE LOWER(:keywords)', {
+              keywords: `%${keywords}%`,
             })
-            .orWhere('user.phoneNumber LIKE :search', {
-              search: `%${search}%`,
+            .orWhere('user.phoneNumber LIKE :keywords', {
+              keywords: `%${keywords}%`,
             });
         }),
       );

@@ -17,7 +17,7 @@ export class CustomersService {
       await this.usersRepository.findCustomersByCondition(
         query.skip,
         query.limit,
-        query.search,
+        query.keywords,
       );
 
     return plainToInstance(ListUserDto, {
