@@ -10,4 +10,7 @@ export class JwtPayload {
 
   @Expose()
   roleName: string;
+
+  @Expose()
+  jti: string;
 }

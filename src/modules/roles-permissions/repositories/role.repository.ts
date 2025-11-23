@@ -1,17 +1,12 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { ERoles } from 'src/shared/constants/role.constant';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
 import { Role } from '../entities/role.entity';
 
 @Injectable()
-export class RoleRepository extends BaseRepository<Role> {
-  constructor(
-    @InjectDataSource()
-    protected dataSource: DataSource,
-  ) {
-    super(dataSource, Role);
+export class RoleRepository extends Repository<Role> {
+  constructor(protected dataSource: DataSource) {
+    super(Role, dataSource.createEntityManager());
   }
 
   async findAll(): Promise<Role[]> {

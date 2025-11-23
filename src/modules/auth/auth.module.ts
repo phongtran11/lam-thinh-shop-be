@@ -28,11 +28,6 @@ import { LocalStrategy } from 'src/shared/strategies/local.strategy';
     RegisterTransaction,
     RefreshTokenTransaction,
   ],
-  exports: [
-    AuthService,
-    RefreshTokensRepository,
-    RegisterTransaction,
-    RefreshTokenTransaction,
-  ],
+  exports: [AuthService, RefreshTokensRepository],
 })
 export class AuthModule {}

@@ -1,8 +1,10 @@
 import { Strategy } from 'passport-local';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { AuthService } from 'src/modules/auth/services/auth.service';
+import { HTTPUnauthorizedException } from 'src/shared/exceptions';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -19,13 +21,14 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateUser(email, password);
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new HTTPUnauthorizedException('Email or password are not corected');
     }
 
     return {
       sub: user.id,
       email: user.email,
       roleName: user.role.name,
+      jti: uuidv4(),
     };
   }
 }

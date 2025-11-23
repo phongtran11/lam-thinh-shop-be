@@ -1,30 +1,40 @@
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { REFRESH_TOKEN_REVOKE_REASON } from 'src/shared/constants/auth.constant';
 import { BaseTransaction } from 'src/shared/providers/transaction.provider';
 
 @Injectable()
 export class RefreshTokenTransaction extends BaseTransaction {
-  constructor(
-    @InjectDataSource()
-    protected readonly dataSource: DataSource,
-    protected readonly refreshTokensRepository: RefreshTokensRepository,
-  ) {
+  constructor(protected readonly dataSource: DataSource) {
     super(dataSource);
-    this.registerRepository(refreshTokensRepository);
   }
 
+  /**
+   * Refresh token transaction
+   * - Revoke old refresh token
+   * - Insert new refresh token
+   * - Return new refresh token
+   */
   async execute(refreshTokenRevokeId: string, newRefreshToken: RefreshToken) {
-    return this.transaction(async () => {
-      await this.refreshTokensRepository.revokeTokenById(
-        refreshTokenRevokeId,
-        REFRESH_TOKEN_REVOKE_REASON.TOKEN_REFRESH,
+    return this.transaction(async (entityManager) => {
+      const refreshTokensRepository = entityManager.getRepository(RefreshToken);
+
+      await refreshTokensRepository.update(
+        { id: refreshTokenRevokeId },
+        {
+          isRevoked: true,
+          revokedAt: new Date(),
+          revokeReason: REFRESH_TOKEN_REVOKE_REASON.TOKEN_REFRESH,
+        },
       );
-      await this.refreshTokensRepository.insert(newRefreshToken);
-      return this.refreshTokensRepository.findOneById(newRefreshToken.id);
+
+      await refreshTokensRepository.insert(newRefreshToken);
+
+      return refreshTokensRepository
+        .createQueryBuilder('refreshToken')
+        .where('refreshToken.id = :tokenId', { tokenId: newRefreshToken.id })
+        .getOne();
     });
   }
 }

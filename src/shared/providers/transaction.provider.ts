@@ -1,44 +1,33 @@
-import { DataSource, QueryRunner } from 'typeorm';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
+import { DataSource, EntityManager, QueryRunner } from 'typeorm';
 
 /**
  * Base Transaction Class
  *
  * Features:
  * - Auto transaction handling (begin/commit/rollback)
- * - Auto set/clear manager for all repositories
  * - Error handling and rollback on failure
  *
- * Note: All repositories used in transaction
- * MUST be registered in constructor using registerRepository() to enable automatic transaction manager injection
- *
  * Usage:
- * class RegisterTransaction extends BaseTransaction {
+ * class ExampleTransaction extends BaseTransaction {
  *   constructor(dataSource, userRepo, tokenRepo) {
  *     super(dataSource);
- *     this.registerRepository(userRepo);
- *     this.registerRepository(tokenRepo);
  *   }
  *
- *   async register(input) {
- *     return this.execute(async () => {
- *       // All operations here are in transaction
+ *   async execute(input) {
+ *     return this.transaction(async (em: EntityManager) => {
+ *       // All DB operations below run inside a single transaction
+ *       const fooRepo = em.getRepository(EntityFoo);
+ *       const barRepo = em.getRepository(EntityBar);
+ *       // …your business logic…
+ *       return result;
  *     });
  *   }
  * }
  */
 export abstract class BaseTransaction {
-  /**
-   * Query runner for transaction
-   */
   private queryRunner: QueryRunner;
 
-  /**
-   * Track all repositories in this transaction
-   */
-  private repositories: BaseRepository<any>[] = [];
-
-  constructor(protected dataSource: DataSource) {}
+  constructor(protected readonly dataSource: DataSource) {}
 
   /**
    * Begin transaction
@@ -48,80 +37,31 @@ export abstract class BaseTransaction {
     this.queryRunner = this.dataSource.createQueryRunner();
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
-
-    // Set transaction manager for all repositories
-    this.repositories.forEach((repo) => {
-      repo.setManager(this.queryRunner.manager);
-    });
-  }
-
-  /**
-   * Commit transaction
-   * Clear manager from all repositories
-   */
-  private async commit(): Promise<void> {
-    try {
-      await this.queryRunner.commitTransaction();
-    } finally {
-      this.clearAllRepositories();
-      await this.queryRunner.release();
-    }
-  }
-
-  /**
-   * Rollback transaction
-   * Clear manager from all repositories
-   */
-  private async rollback(): Promise<void> {
-    try {
-      await this.queryRunner.rollbackTransaction();
-    } finally {
-      this.clearAllRepositories();
-      await this.queryRunner.release();
-    }
-  }
-
-  /**
-   * Clear manager from all repositories
-   */
-  private clearAllRepositories(): void {
-    this.repositories.forEach((repo) => {
-      repo.clearManager();
-    });
-  }
-
-  /**
-   * Register repository to auto set/clear manager
-   */
-  protected registerRepository(repo: BaseRepository<any>): void {
-    this.repositories.push(repo);
   }
 
   /**
    * Execute callback in transaction
    * Auto begin/commit/rollback
    */
-  protected async transaction<T>(callback: () => Promise<T>): Promise<T> {
-    await this.begin();
+  protected async transaction<T>(
+    callback: (em: EntityManager) => Promise<T>,
+  ): Promise<T> {
     try {
-      const result = await callback();
-      await this.commit();
+      await this.begin();
+      const result = await callback(this.queryRunner.manager);
+      await this.queryRunner.commitTransaction();
       return result;
     } catch (error) {
-      await this.rollback();
+      await this.queryRunner.rollbackTransaction();
       throw error;
+    } finally {
+      await this.queryRunner.release();
     }
   }
 
   /**
-   * Abstract run method to be implemented by subclasses
-   * Use this method to define transaction logic
-   * Example implementation:
-   * async execute(arg1: Type1, arg2: Type2): Promise<ReturnType> {
-   *   return this.transaction(async () => {
-   *     // Transactional operations here
-   *   });
-   * }
+   * - Abstract run method to be implemented by subclasses
+   * - Use this method to define transaction logic
    * @param args
    */
   abstract execute(...args: any[]): Promise<any>;

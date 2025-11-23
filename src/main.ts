@@ -1,12 +1,12 @@
 import 'dotenv/config';
 import helmet from 'helmet';
-import { Logger, LoggerErrorInterceptor } from 'pino-nestjs';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TConfigs } from './configs/configs.type';
+import { HttpExceptionLoggerFilter } from './shared/exception-filters/http-exceptions';
 import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
 
 async function bootstrap() {
@@ -14,27 +14,23 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
-  app.useLogger(app.get(Logger));
+  // app.useLogger(app.get(Logger));
+  // app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   app.use(helmet());
-
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
-  app.useGlobalInterceptors(new LoggerErrorInterceptor());
-
+  app.useGlobalFilters(new HttpExceptionLoggerFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
     }),
   );
-
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-
   const routePrefix = 'api';
-
   app.setGlobalPrefix(routePrefix);
 
   const config = new DocumentBuilder()
@@ -51,11 +47,10 @@ async function bootstrap() {
     .getOrThrow('commonConfig.appPort', { infer: true });
 
   await app.listen(appPort, () => {
-    app
-      .get(Logger)
-      .log(
-        `Application is running on: http://localhost:${appPort}/${routePrefix}/v1/docs`,
-      );
+    const logger = new Logger('Bootstrap');
+    logger.log(
+      `Swagger is running on: http://localhost:${appPort}/${routePrefix}/v1/docs`,
+    );
   });
 }
 

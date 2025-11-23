@@ -26,11 +26,9 @@ export class RefreshToken {
   user: User;
 
   @Column({
-    type: 'varchar',
-    length: 64,
-    unique: true,
+    type: 'text',
     name: 'token_hash',
-    comment: 'The hashed value of the refresh token (SHA-256)',
+    comment: 'The hashed value of the refresh token',
   })
   tokenHash: string;
 

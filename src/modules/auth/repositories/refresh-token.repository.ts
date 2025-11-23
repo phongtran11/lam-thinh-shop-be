@@ -1,29 +1,22 @@
-import { LessThan, UpdateResult } from 'typeorm';
+import { LessThan, Repository, UpdateResult } from 'typeorm';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import {
   ERefreshTokenRevokeReason,
   REFRESH_TOKEN_REVOKE_REASON,
 } from 'src/shared/constants/auth.constant';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
-export class RefreshTokensRepository extends BaseRepository<RefreshToken> {
-  constructor(
-    @InjectDataSource()
-    protected dataSource: DataSource,
-  ) {
-    super(dataSource, RefreshToken);
+export class RefreshTokensRepository extends Repository<RefreshToken> {
+  constructor(protected dataSource: DataSource) {
+    super(RefreshToken, dataSource.createEntityManager());
   }
 
-  async findActiveTokenByHash(tokenHash: string): Promise<RefreshToken | null> {
+  async findActiveRefreshTokenByTokenId(
+    tokenId: string,
+  ): Promise<RefreshToken | null> {
     return this.createQueryBuilder('refreshToken')
-      .leftJoinAndSelect('refreshToken.user', 'user')
-      .where('refreshToken.tokenHash = :tokenHash', { tokenHash })
-      .andWhere('refreshToken.isRevoked = :isRevoked', { isRevoked: false })
-      .andWhere('refreshToken.expiresAt > :now', { now: new Date() })
       .select([
         'refreshToken',
         'user.id',
@@ -31,6 +24,10 @@ export class RefreshTokensRepository extends BaseRepository<RefreshToken> {
         'user.firstName',
         'user.lastName',
       ])
+      .leftJoinAndSelect('refreshToken.user', 'user')
+      .where('refreshToken.id = :tokenId', { tokenId })
+      .andWhere('refreshToken.isRevoked = :isRevoked', { isRevoked: false })
+      .andWhere('refreshToken.expiresAt > :now', { now: new Date() })
       .getOne();
   }
 

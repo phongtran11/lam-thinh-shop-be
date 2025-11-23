@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { TConfigs } from 'src/configs/configs.type';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { TokenDto } from 'src/modules/auth/dto/token.dto';
+import { HTTPUnauthorizedException } from 'src/shared/exceptions';
 
 @Injectable()
 export class TokenService {
@@ -53,6 +54,18 @@ export class TokenService {
         },
       ),
     });
+  }
+
+  verifyRefreshToken(refreshToken: string): JwtPayload {
+    try {
+      return this.jwtService.verify(refreshToken, {
+        secret: this.configService.getOrThrow('jwtRefreshTokenConfig.secret', {
+          infer: true,
+        }),
+      });
+    } catch {
+      throw new HTTPUnauthorizedException('Invalid refresh token');
+    }
   }
 
   getRefreshTokenExpirationDate(): Date {

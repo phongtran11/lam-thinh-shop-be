@@ -1,17 +1,18 @@
-import { Brackets, DataSource } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
 import { ROLES } from 'src/shared/constants/role.constant';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
 
 @Injectable()
-export class UsersRepository extends BaseRepository<User> {
-  constructor(
-    @InjectDataSource()
-    protected dataSource: DataSource,
-  ) {
-    super(dataSource, User);
+export class UsersRepository extends Repository<User> {
+  constructor(protected readonly dataSource: DataSource) {
+    super(User, dataSource.createEntityManager());
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    return await this.createQueryBuilder('user')
+      .where('user.email = :email', { email })
+      .getExists();
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -71,9 +72,9 @@ export class UsersRepository extends BaseRepository<User> {
     take: number,
     keywords?: string,
   ): Promise<[User[], number]> {
-    const qb = this.createQueryBuilder('user')
-      .leftJoin('user.role', 'role')
-      .where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
+    const qb = this.createQueryBuilder('user').leftJoin('user.role', 'role');
+
+    qb.where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
 
     if (keywords) {
       qb.andWhere(

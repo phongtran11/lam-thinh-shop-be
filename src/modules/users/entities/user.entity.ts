@@ -17,8 +17,7 @@ export class User extends BaseEntity {
 
   @Column({
     name: 'password',
-    type: 'varchar',
-    length: 60,
+    type: 'text',
     comment: 'The hashed password of the user',
   })
   password: string;

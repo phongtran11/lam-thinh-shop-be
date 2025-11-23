@@ -1,5 +1,14 @@
-import { Controller, Post, UseGuards, Body, Req, Get } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Body,
+  Req,
+  Get,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common';
+import { ApiBody, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { LoginDto } from 'src/modules/auth/dto/login.dto';
 import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
@@ -26,6 +35,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(LocalAuthGuard)
   @ApiCreatedResponseCustom(TokenDto)
   @ApiBody({ type: LoginDto })
@@ -38,6 +48,7 @@ export class AuthController {
 
   @Post('register')
   @Public()
+  @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponseCustom(TokenDto)
   async register(@Body() registerDto: RegisterDto): Promise<TokenDto> {
     return this.authService.register(registerDto);
@@ -45,6 +56,7 @@ export class AuthController {
 
   @Post('refresh-token')
   @Public()
+  @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponseCustom(TokenDto)
   async refreshToken(
     @Body() refreshTokenRequestDto: RefreshTokenRequestDto,
@@ -53,13 +65,15 @@ export class AuthController {
   }
 
   @Post('logout')
-  @ApiOkResponse()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
   async logout(@Body() logoutDto: LogoutDto): Promise<void> {
     return this.authService.logout(logoutDto);
   }
 
   @Get('me')
   @ApiResponseCustom(GetMeResponseDto)
+  @HttpCode(HttpStatus.OK)
   async getMe(): Promise<GetMeResponseDto> {
     return await this.authService.getMe();
   }

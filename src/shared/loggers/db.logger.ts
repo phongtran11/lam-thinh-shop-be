@@ -6,7 +6,7 @@ export class DatabaseLogger implements Logger {
 
   logQuery(query: string, parameters?: any[]): void {
     const params = parameters ? JSON.stringify(parameters) : '[]';
-    this.logger.log(`Query: \n ${query} -- Params: ${params}`);
+    this.logger.debug(`Query: \n ${query} -- Params: ${params}`);
   }
 
   logQueryError(error: string, query: string, parameters?: any[]): void {
@@ -23,20 +23,20 @@ export class DatabaseLogger implements Logger {
   }
 
   logSchemaBuild(message: string): void {
-    this.logger.log(`Schema Build: ${message}`);
+    this.logger.debug(`Schema Build: ${message}`);
   }
 
   logMigration(message: string): void {
-    this.logger.log(`Migration: ${message}`);
+    this.logger.debug(`Migration: ${message}`);
   }
 
   log(level: 'log' | 'info' | 'warn', message: any): void {
     switch (level) {
       case 'log':
-        this.logger.log(`${message}`);
+        this.logger.debug(`${message}`);
         break;
       case 'info':
-        this.logger.log(`${message}`);
+        this.logger.debug(`${message}`);
         break;
       case 'warn':
         this.logger.warn(`${message}`);

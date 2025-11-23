@@ -17,7 +17,6 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { PermissionsGuard } from 'src/shared/guards/permissions.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { LogMiddleWare } from 'src/shared/middlewares/log.middleware';
-import { PinoLoggerModule } from 'src/shared/pino-logger/pino-logger.module';
 
 @Module({
   imports: [
@@ -35,7 +34,7 @@ import { PinoLoggerModule } from 'src/shared/pino-logger/pino-logger.module';
       global: true,
       middleware: { mount: true },
     }),
-    PinoLoggerModule.forRootAsync(),
+    // PinoLoggerModule.forRootAsync(),
 
     // MODULES
     AuthModule,
