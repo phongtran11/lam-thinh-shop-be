@@ -8,7 +8,7 @@ export const RESOURCES = {
   SYSTEM: 'system',
 } as const;
 
-export type EResources = (typeof RESOURCES)[keyof typeof RESOURCES];
+export type Resources = (typeof RESOURCES)[keyof typeof RESOURCES];
 
 export const ACTIONS = {
   CREATE: 'create',
@@ -17,7 +17,7 @@ export const ACTIONS = {
   DELETE: 'delete',
 } as const;
 
-export type EActions = (typeof ACTIONS)[keyof typeof ACTIONS];
+export type Actions = (typeof ACTIONS)[keyof typeof ACTIONS];
 
 export const PERMISSIONS = {
   // Users
@@ -51,4 +51,4 @@ export const PERMISSIONS = {
   CATEGORIES_DELETE: `${RESOURCES.CATEGORIES}:${ACTIONS.DELETE}`,
 } as const;
 
-export type EPermissions = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+export type Permissions = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

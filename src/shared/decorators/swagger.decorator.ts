@@ -11,14 +11,13 @@ import {
 } from '@nestjs/swagger';
 import {
   BadRequestResponseDto,
-  CreatedResponseDto,
   InternalServerErrorResponseDto,
   NotFoundResponseDto,
   SuccessResponseDto,
   UnauthorizedResponseDto,
-} from 'src/shared/dto/response.dto';
+} from 'src/shared/dtos';
 
-export const ApiResponseCustom = <T extends Type<any>>(
+export const ApiResponseOkCustom = <T extends Type<any>>(
   data: T,
   options: { isArray?: boolean } = {},
 ) => {
@@ -52,11 +51,11 @@ export const ApiResponseCustom = <T extends Type<any>>(
 
 export const ApiCreatedResponseCustom = <T extends Type<any>>(data: T) => {
   return applyDecorators(
-    ApiExtraModels(CreatedResponseDto, data),
+    ApiExtraModels(SuccessResponseDto, data),
     ApiCreatedResponse({
       schema: {
         allOf: [
-          { $ref: getSchemaPath(CreatedResponseDto) },
+          { $ref: getSchemaPath(SuccessResponseDto) },
           {
             properties: {
               data: {

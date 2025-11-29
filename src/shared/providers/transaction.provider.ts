@@ -1,4 +1,5 @@
 import { DataSource, EntityManager, QueryRunner } from 'typeorm';
+import { Logger } from '@nestjs/common';
 
 /**
  * Base Transaction Class
@@ -26,6 +27,7 @@ import { DataSource, EntityManager, QueryRunner } from 'typeorm';
  */
 export abstract class BaseTransaction {
   private queryRunner: QueryRunner;
+  private logger = new Logger(BaseTransaction.name);
 
   constructor(protected readonly dataSource: DataSource) {}
 
@@ -55,7 +57,14 @@ export abstract class BaseTransaction {
       await this.queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      await this.queryRunner.release();
+      try {
+        await this.queryRunner.release();
+      } catch (releaseError) {
+        this.logger.error(
+          releaseError,
+          (releaseError as unknown as Error)?.stack,
+        );
+      }
     }
   }
 

@@ -1,28 +1,27 @@
 import { In } from 'typeorm';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
+import { RefreshTokensRepository } from './modules/auth';
 import { Permission } from './modules/roles-permissions/entities/permission.entity';
 import { Role } from './modules/roles-permissions/entities/role.entity';
-import { PermissionRepository } from './modules/roles-permissions/repositories/permission.repository';
-import { RolePermissionsRepository } from './modules/roles-permissions/repositories/role-permissions.repository';
-import { RoleRepository } from './modules/roles-permissions/repositories/role.repository';
+import {
+  PermissionRepository,
+  RoleRepository,
+  RolePermissionsRepository,
+} from './modules/roles-permissions/repositories';
 import { User } from './modules/users/entities/user.entity';
 import { UsersRepository } from './modules/users/repositories/users.repository';
 import {
-  EPermissions,
+  Roles,
+  ROLES,
+  Permissions,
+  ROLE_DESCRIPTION,
   PERMISSIONS,
   RESOURCES,
-} from './shared/constants/permission.constant';
-import {
-  ERoles,
-  ROLE_DESCRIPTION,
-  ROLE_HIERARCHY,
-  ROLES,
-} from './shared/constants/role.constant';
-import { EncryptionService } from './shared/services/encryption.service';
+  EncryptionService,
+} from './shared';
 
-const initUsers: Array<Partial<User> & { roleName: ERoles }> = [
+const initUsers: Array<Partial<User> & { roleName: Roles }> = [
   {
     email: 'admin@gmail.com',
     password: 'test@123',
@@ -289,12 +288,11 @@ const initUsers: Array<Partial<User> & { roleName: ERoles }> = [
   },
 ];
 
-const initRoles: Array<Partial<Role> & { permissionNames: EPermissions[] }> = [
+const initRoles: Array<Partial<Role> & { permissionNames: Permissions[] }> = [
   {
     name: ROLES.ADMIN,
     displayName: 'Administrator',
     description: ROLE_DESCRIPTION[ROLES.ADMIN],
-    level: ROLE_HIERARCHY[ROLES.ADMIN],
     permissionNames: [
       PERMISSIONS.USERS_CREATE,
       PERMISSIONS.USERS_READ,
@@ -322,7 +320,6 @@ const initRoles: Array<Partial<Role> & { permissionNames: EPermissions[] }> = [
     name: ROLES.MANAGER,
     displayName: 'Manager',
     description: ROLE_DESCRIPTION[ROLES.MANAGER],
-    level: ROLE_HIERARCHY[ROLES.MANAGER],
     permissionNames: [
       PERMISSIONS.USERS_CREATE,
       PERMISSIONS.USERS_READ,
@@ -342,7 +339,6 @@ const initRoles: Array<Partial<Role> & { permissionNames: EPermissions[] }> = [
     name: ROLES.STAFF,
     displayName: 'Staff',
     description: ROLE_DESCRIPTION[ROLES.STAFF],
-    level: ROLE_HIERARCHY[ROLES.STAFF],
     permissionNames: [
       PERMISSIONS.PRODUCTS_CREATE,
       PERMISSIONS.PRODUCTS_READ,
@@ -358,7 +354,6 @@ const initRoles: Array<Partial<Role> & { permissionNames: EPermissions[] }> = [
     name: ROLES.CUSTOMER,
     displayName: 'Customer',
     description: ROLE_DESCRIPTION[ROLES.CUSTOMER],
-    level: ROLE_HIERARCHY[ROLES.CUSTOMER],
     permissionNames: [PERMISSIONS.PRODUCTS_READ, PERMISSIONS.CATEGORIES_READ],
   },
 ];

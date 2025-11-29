@@ -24,14 +24,14 @@ export class HTTPNotFoundException extends HttpException {
   }
 }
 
-export class HTTPInternalServerErrorException extends HttpException {
-  constructor(message: string) {
-    super(message, HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-}
-
 export class HTTPConflictException extends HttpException {
   constructor(message: string) {
     super(message, HttpStatus.CONFLICT);
+  }
+}
+
+export class HTTPInternalServerErrorException extends HttpException {
+  constructor(message: string) {
+    super(message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

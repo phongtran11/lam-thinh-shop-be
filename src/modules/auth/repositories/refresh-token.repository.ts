@@ -1,15 +1,19 @@
 import { LessThan, Repository, UpdateResult } from 'typeorm';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import {
-  ERefreshTokenRevokeReason,
+  RefreshTokenRevokeReason,
   REFRESH_TOKEN_REVOKE_REASON,
 } from 'src/shared/constants/auth.constant';
 
 @Injectable()
 export class RefreshTokensRepository extends Repository<RefreshToken> {
-  constructor(protected dataSource: DataSource) {
+  constructor(
+    @InjectDataSource()
+    protected dataSource: DataSource,
+  ) {
     super(RefreshToken, dataSource.createEntityManager());
   }
 
@@ -39,7 +43,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
 
   async revokeTokenByToken(
     tokenHash: string,
-    reason: ERefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
+    reason: RefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
   ): Promise<UpdateResult> {
     return this.update(
       { tokenHash },
@@ -53,7 +57,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
 
   async revokeTokenById(
     tokenId: string,
-    reason: ERefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
+    reason: RefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
   ): Promise<UpdateResult> {
     return this.update(
       { id: tokenId },

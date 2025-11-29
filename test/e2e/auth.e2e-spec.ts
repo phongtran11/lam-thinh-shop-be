@@ -11,7 +11,7 @@ import { AuthResDto } from 'src/modules/auth/dto/auth.dto';
 import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { User } from 'src/modules/users/entities/user.entity';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { SuccessResponseDto } from 'src/shared/dto/response.dto';
+import { SuccessResponseDto } from 'src/shared/dtos/response.dto';
 import { GlobalResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 
 describe('AuthModule (e2e)', () => {

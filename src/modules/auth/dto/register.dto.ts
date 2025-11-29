@@ -1,4 +1,3 @@
-import { Exclude, Expose } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,13 +8,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Match } from 'src/shared/decorators/match.decorator';
 
-@Exclude()
 export class RegisterDto {
   @ApiProperty({
     example: 'john.doe@example.com',
     required: true,
   })
-  @Expose()
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -24,7 +21,6 @@ export class RegisterDto {
     example: 'password123',
     required: true,
   })
-  @Expose()
   @IsString()
   @IsNotEmpty()
   password: string;
@@ -33,7 +29,6 @@ export class RegisterDto {
     example: 'password123',
     required: true,
   })
-  @Expose()
   @Match('password', { message: 'Passwords do not match' })
   @IsString()
   @IsNotEmpty()
@@ -43,7 +38,6 @@ export class RegisterDto {
     example: 'John',
     required: true,
   })
-  @Expose()
   @IsString()
   @Length(1, 64)
   firstName: string;
@@ -52,7 +46,6 @@ export class RegisterDto {
     example: 'Doe',
     required: true,
   })
-  @Expose()
   @IsString()
   @Length(1, 64)
   lastName: string;
@@ -61,7 +54,6 @@ export class RegisterDto {
     example: '+84901234567',
     required: true,
   })
-  @Expose()
   @IsNumberString()
   @Length(9, 20)
   phoneNumber: string;

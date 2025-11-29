@@ -1,8 +1,8 @@
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { RefreshToken } from 'src/modules/auth/entities/';
 import { Role } from 'src/modules/roles-permissions/entities/role.entity';
-import { EPermissions } from 'src/shared/constants/permission.constant';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { Permissions } from 'src/shared/constants';
+import { BaseEntity } from 'src/shared/entities';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
@@ -19,6 +19,7 @@ export class User extends BaseEntity {
     name: 'password',
     type: 'text',
     comment: 'The hashed password of the user',
+    select: false,
   })
   password: string;
 
@@ -64,6 +65,7 @@ export class User extends BaseEntity {
   })
   roleId: string;
 
+  // Relations
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
   role: Role;
@@ -71,27 +73,17 @@ export class User extends BaseEntity {
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens?: RefreshToken[];
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
-  createdByUser?: User;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
-  updatedByUser?: User;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'deleted_by', referencedColumnName: 'id' })
-  deletedByUser?: User;
-
+  // Getters
   get fullName(): string {
     return `${this.firstName || ''} ${this.lastName || ''}`.trim();
   }
 
-  hasPermission(permission: EPermissions): boolean {
+  // Methods
+  hasPermission(permission: Permissions): boolean {
     return this.role?.permissions?.some((p) => p.name === permission) || false;
   }
 
-  hasAnyPermission(permissions: EPermissions[]): boolean {
+  hasAnyPermission(permissions: Permissions[]): boolean {
     return permissions.some((permission) => this.hasPermission(permission));
   }
 

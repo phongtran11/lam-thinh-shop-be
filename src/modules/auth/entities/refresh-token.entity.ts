@@ -27,6 +27,7 @@ export class RefreshToken {
 
   @Column({
     type: 'text',
+    unique: true,
     name: 'token_hash',
     comment: 'The hashed value of the refresh token',
   })

@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
 import { User } from 'src/modules/users/entities/user.entity';
-import { ERoles, ROLE_HIERARCHY } from 'src/shared/constants/role.constant';
+import { Roles } from 'src/shared/constants/role.constant';
 import { ROLES_KEY } from 'src/shared/decorators/roles.decorator';
 import { HTTPForbiddenException } from 'src/shared/exceptions';
 
@@ -21,10 +21,10 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<ERoles[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredRoles = this.reflector.getAllAndOverride<Roles[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
@@ -43,13 +43,8 @@ export class RolesGuard implements CanActivate {
     }
 
     const roleName = role.name;
-    const userRoleLevel = ROLE_HIERARCHY[roleName] || 0;
 
-    // Check if user has any of the required roles or higher
-    const hasRequiredRole = requiredRoles.some((role) => {
-      const requiredRoleLevel = ROLE_HIERARCHY[role] || 0;
-      return userRoleLevel >= requiredRoleLevel;
-    });
+    const hasRequiredRole = requiredRoles.includes(roleName);
 
     if (!hasRequiredRole) {
       throw new HTTPForbiddenException(

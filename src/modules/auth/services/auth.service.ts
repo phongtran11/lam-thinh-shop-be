@@ -4,11 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { Injectable, Logger } from '@nestjs/common';
 import { AuthResDto, AuthUserResDto } from 'src/modules/auth/dto/auth.dto';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
+import { LoginDto } from 'src/modules/auth/dto/login.dto';
 import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
-import { GetMeResponseDto } from 'src/modules/auth/dto/me.dto';
 import { RefreshTokenRequestDto } from 'src/modules/auth/dto/refresh-token.dto';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
 import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
+import { LoginTransaction } from 'src/modules/auth/transactions/login.transaction';
 import { RefreshTokenTransaction } from 'src/modules/auth/transactions/refresh-token.transaction';
 import { RegisterTransaction } from 'src/modules/auth/transactions/register.transaction';
 import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
@@ -20,7 +21,6 @@ import { ROLES } from 'src/shared/constants/role.constant';
 import {
   HTTPBadRequestException,
   HTTPConflictException,
-  HTTPNotFoundException,
   HTTPUnauthorizedException,
 } from 'src/shared/exceptions';
 import { EncryptionService } from 'src/shared/services/encryption.service';
@@ -36,51 +36,81 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
     private readonly tokenService: TokenService,
     private readonly registerTransaction: RegisterTransaction,
+    private readonly loginTransaction: LoginTransaction,
     private readonly refreshTokenTransaction: RefreshTokenTransaction,
     private readonly clsService: ClsService,
     private readonly roleRepository: RoleRepository,
   ) {}
 
+  /**
+   * Login user
+   * @param loginDto
+   * @returns
+   */
+  async login(loginDto: LoginDto): Promise<AuthResDto> {
+    // Validate user credentials
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+
+    if (!user) {
+      throw new HTTPUnauthorizedException('Email or password are not correct');
+    }
+
+    // Create JWT payload
+    const jwtPayload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      roleName: user.role.name,
+      jti: uuidv4(),
+    };
+
+    // Generate tokens
+    const tokens = await this.tokenService.generateTokens(jwtPayload);
+    const refreshTokenHash = await this.encryptionService.hash(
+      tokens.refreshToken,
+    );
+
+    // Save refresh token in transaction to prevent race conditions
+    await this.loginTransaction.execute(
+      jwtPayload,
+      refreshTokenHash,
+      this.tokenService.getRefreshTokenExpirationDate(),
+    );
+
+    return plainToInstance(AuthResDto, {
+      ...tokens,
+      user: plainToInstance(AuthUserResDto, user),
+    });
+  }
+
+  /**
+   * Validate user credentials
+   * @param email
+   * @param password
+   * @returns
+   */
   async validateUser(
     email: string,
     password: string,
-  ): Promise<UserWithRoleDto> {
+  ): Promise<UserWithRoleDto | null> {
     const user = await this.usersRepository.findOneWithRoleByEmail(email);
 
-    if (!user) return plainToInstance(UserWithRoleDto, null);
-
+    // Always compare password to prevent timing attacks
     const isCorrectPassword = await this.encryptionService.compare(
-      user.password,
+      user?.password || '',
       password,
     );
 
     if (user && isCorrectPassword) {
       return plainToInstance(UserWithRoleDto, user);
     }
-    return plainToInstance(UserWithRoleDto, null);
+    return null;
   }
 
-  async login(user: JwtPayload): Promise<AuthResDto> {
-    const tokens = await this.tokenService.generateTokens(user);
-    const refreshTokenHash = await this.encryptionService.hash(
-      tokens.refreshToken,
-    );
-
-    await this.refreshTokensRepository.insert({
-      id: user.jti,
-      userId: user.sub,
-      tokenHash: refreshTokenHash,
-      expiresAt: this.tokenService.getRefreshTokenExpirationDate(),
-    });
-
-    const userEntity = await this.usersRepository.findOneByEmail(user.email);
-
-    return plainToInstance(AuthResDto, {
-      ...tokens,
-      user: plainToInstance(AuthUserResDto, userEntity),
-    });
-  }
-
+  /**
+   * Register new user
+   * @param registerDto
+   * @returns
+   */
   async register(registerDto: RegisterDto): Promise<AuthResDto> {
     const existingUser = await this.usersRepository.existsByEmail(
       registerDto.email,
@@ -90,10 +120,13 @@ export class AuthService {
       throw new HTTPConflictException('Email is already in use');
     }
 
-    const [hashedPassword, customerRole] = await Promise.all([
-      this.encryptionService.hash(registerDto.password),
-      this.roleRepository.findOneByName(ROLES.CUSTOMER),
-    ]);
+    const hashedPassword = await this.encryptionService.hash(
+      registerDto.password,
+    );
+
+    const customerRole = await this.roleRepository.findOneByName(
+      ROLES.CUSTOMER,
+    );
 
     if (!customerRole) {
       throw new HTTPBadRequestException('Customer role not found');
@@ -105,19 +138,22 @@ export class AuthService {
       roleId: customerRole.id,
     });
 
-    const refreshToken = this.refreshTokensRepository.create();
-
-    const { token, user } = await this.registerTransaction.execute(
+    const { tokens, user } = await this.registerTransaction.execute(
       newUser,
-      refreshToken,
+      customerRole,
     );
 
     return plainToInstance(AuthResDto, {
-      ...token,
+      ...tokens,
       user: plainToInstance(AuthUserResDto, user),
     });
   }
 
+  /**
+   * Refresh tokens
+   * @param refreshTokenRequestDto
+   * @returns
+   */
   async refreshToken(
     refreshTokenRequestDto: RefreshTokenRequestDto,
   ): Promise<AuthResDto> {
@@ -134,7 +170,7 @@ export class AuthService {
       throw new HTTPUnauthorizedException('Invalid or expired refresh token');
     }
 
-    const user = await this.usersRepository.findOneWithRolePermissionsById(
+    const user = await this.usersRepository.findOneWithRoleById(
       tokenEntity.userId,
     );
 
@@ -172,6 +208,10 @@ export class AuthService {
     });
   }
 
+  /**
+   * Logout user by revoking their refresh token
+   * @param logoutDto
+   */
   async logout(logoutDto: LogoutDto): Promise<void> {
     const jwtPayload = this.tokenService.verifyRefreshToken(
       logoutDto.refreshToken,
@@ -200,17 +240,5 @@ export class AuthService {
       validTokenByToken.tokenHash,
       REFRESH_TOKEN_REVOKE_REASON.USER_LOGOUT,
     );
-  }
-
-  async getMe(): Promise<GetMeResponseDto> {
-    const userId = this.clsService.get<JwtPayload>(CLS_KEY.JWT_PAYLOAD)?.sub;
-    const user =
-      await this.usersRepository.findOneWithRolePermissionById(userId);
-
-    if (!user) {
-      throw new HTTPNotFoundException('User not found');
-    }
-
-    return plainToInstance(GetMeResponseDto, user);
   }
 }

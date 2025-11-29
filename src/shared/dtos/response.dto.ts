@@ -1,30 +1,7 @@
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditUserInfoDto } from 'src/shared/dto/audit-user-info.dto';
 
 export class SuccessResponseDto<T> {
-  @ApiProperty({
-    example: 200,
-    type: Number,
-  })
-  statusCode: number;
-
-  @ApiProperty({
-    example: 'success',
-    type: String,
-  })
-  message: string;
-
-  data: T;
-}
-
-export class CreatedResponseDto<T> {
-  @ApiProperty({
-    example: 201,
-    type: Number,
-  })
-  statusCode: number;
-
   @ApiProperty({
     example: 'success',
     type: String,
@@ -36,23 +13,16 @@ export class CreatedResponseDto<T> {
 
 export class BadRequestResponseDto {
   @ApiProperty({
-    example: ['property is required'],
-    isArray: true,
+    example: 'property is required, property must be a string',
     type: String,
   })
-  message: string[];
+  message: string;
 
   @ApiProperty({
     example: 'Bad request',
     type: String,
   })
   error: string;
-
-  @ApiProperty({
-    example: 400,
-    type: Number,
-  })
-  statusCode: number;
 }
 
 export class UnauthorizedResponseDto {
@@ -60,7 +30,7 @@ export class UnauthorizedResponseDto {
     example: 'Unauthorized',
     type: String,
   })
-  message: string;
+  error: string;
 
   @ApiProperty({
     example: 401,
@@ -129,25 +99,4 @@ export class BaseResponse {
   })
   @Expose()
   deletedAt: Date;
-
-  @ApiProperty({
-    type: AuditUserInfoDto,
-  })
-  @Expose()
-  @Type(() => AuditUserInfoDto)
-  createdByUser: AuditUserInfoDto;
-
-  @ApiProperty({
-    type: AuditUserInfoDto,
-  })
-  @Expose()
-  @Type(() => AuditUserInfoDto)
-  updatedByUser: AuditUserInfoDto;
-
-  @ApiProperty({
-    type: AuditUserInfoDto,
-  })
-  @Expose()
-  @Type(() => AuditUserInfoDto)
-  deletedByUser: AuditUserInfoDto;
 }

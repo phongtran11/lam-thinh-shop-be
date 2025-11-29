@@ -7,5 +7,5 @@ export const REFRESH_TOKEN_REVOKE_REASON = {
   EXPIRED: 'Expired',
 } as const;
 
-export type ERefreshTokenRevokeReason =
+export type RefreshTokenRevokeReason =
   (typeof REFRESH_TOKEN_REVOKE_REASON)[keyof typeof REFRESH_TOKEN_REVOKE_REASON];

@@ -6,7 +6,7 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import {
   ApiBadRequestResponseCustom,
   ApiInternalServerErrorResponseCustom,
-  ApiResponseCustom,
+  ApiResponseOkCustom,
 } from 'src/shared/decorators/swagger.decorator';
 
 @ApiTags('Roles')
@@ -18,7 +18,7 @@ export class RoleController {
 
   @Get()
   @Public()
-  @ApiResponseCustom(RoleWithPermissionsDto, {
+  @ApiResponseOkCustom(RoleWithPermissionsDto, {
     isArray: true,
   })
   async getRoles(): Promise<RoleWithPermissionsDto[]> {

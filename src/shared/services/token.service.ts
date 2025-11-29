@@ -2,16 +2,16 @@ import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { TConfigs } from 'src/configs/configs.type';
 import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
 import { TokenDto } from 'src/modules/auth/dto/token.dto';
+import { Configurations } from 'src/shared/configs';
 import { HTTPUnauthorizedException } from 'src/shared/exceptions';
 
 @Injectable()
 export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService<TConfigs>,
+    private readonly configService: ConfigService<Configurations>,
   ) {}
 
   async generateTokens(jwtPayload: JwtPayload): Promise<TokenDto> {
@@ -29,37 +29,34 @@ export class TokenService {
   }
 
   generateAccessToken(payload: JwtPayload): Promise<string> {
-    return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('jwtAccessTokenConfig.secret', {
-        infer: true,
-      }),
-      expiresIn: this.configService.getOrThrow(
-        'jwtAccessTokenConfig.expiredIn',
-        {
+    return this.jwtService.signAsync(
+      { payload },
+      {
+        secret: this.configService.getOrThrow('jwt.accessToken.secret', {
           infer: true,
-        },
-      ),
-    });
+        }),
+        expiresIn: this.configService.getOrThrow('jwt.accessToken.expiration', {
+          infer: true,
+        }),
+      },
+    );
   }
 
   generateRefreshToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow('jwtRefreshTokenConfig.secret', {
+      secret: this.configService.getOrThrow('jwt.refreshToken.secret', {
         infer: true,
       }),
-      expiresIn: this.configService.getOrThrow(
-        'jwtRefreshTokenConfig.expiredIn',
-        {
-          infer: true,
-        },
-      ),
+      expiresIn: this.configService.getOrThrow('jwt.refreshToken.expiration', {
+        infer: true,
+      }),
     });
   }
 
   verifyRefreshToken(refreshToken: string): JwtPayload {
     try {
       return this.jwtService.verify(refreshToken, {
-        secret: this.configService.getOrThrow('jwtRefreshTokenConfig.secret', {
+        secret: this.configService.getOrThrow('jwt.refreshToken.secret', {
           infer: true,
         }),
       });
@@ -70,7 +67,7 @@ export class TokenService {
 
   getRefreshTokenExpirationDate(): Date {
     const expiresIn = this.configService.getOrThrow(
-      'jwtRefreshTokenConfig.expiredIn',
+      'jwt.refreshToken.expiration',
       {
         infer: true,
       },
@@ -83,7 +80,7 @@ export class TokenService {
 
   getAccessTokenExpirationDate(): Date {
     const expiresIn = this.configService.getOrThrow(
-      'jwtAccessTokenConfig.expiredIn',
+      'jwt.accessToken.expiration',
       {
         infer: true,
       },

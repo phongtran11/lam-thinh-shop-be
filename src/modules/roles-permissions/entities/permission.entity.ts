@@ -1,9 +1,8 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { RolePermissions } from 'src/modules/roles-permissions/entities/role-permissions.entity';
-import { Role } from 'src/modules/roles-permissions/entities/role.entity';
 import {
-  type EPermissions,
-  type EResources,
+  type Permissions,
+  type Resources,
 } from 'src/shared/constants/permission.constant';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 
@@ -15,7 +14,7 @@ export class Permission extends BaseEntity {
     unique: true,
     comment: 'Permission identifier',
   })
-  name: EPermissions;
+  name: Permissions;
 
   @Column({
     name: 'display_name',
@@ -40,7 +39,7 @@ export class Permission extends BaseEntity {
     length: 255,
     comment: 'Resource associated with the permission',
   })
-  resource: EResources;
+  resource: Resources;
 
   @Column({
     name: 'is_active',
@@ -54,8 +53,4 @@ export class Permission extends BaseEntity {
     (rolePermissions) => rolePermissions.permission,
   )
   rolePermissions: RolePermissions[];
-
-  get roles(): Role[] {
-    return this.rolePermissions?.map((rp) => rp.role) || [];
-  }
 }

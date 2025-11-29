@@ -4,22 +4,21 @@ import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { TConfigs } from './configs/configs.type';
-import { HttpExceptionLoggerFilter } from './shared/exception-filters/http-exceptions';
-import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
+import { AppModule } from 'src/app.module';
+import {
+  Configurations,
+  HttpExceptionFilter,
+  GlobalResponseInterceptor,
+} from 'src/shared';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
 
-  // app.useLogger(app.get(Logger));
-  // app.useGlobalInterceptors(new LoggerErrorInterceptor());
-
   app.use(helmet());
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
-  app.useGlobalFilters(new HttpExceptionLoggerFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -43,8 +42,8 @@ async function bootstrap() {
   SwaggerModule.setup(`${routePrefix}/v1/docs`, app, document);
 
   const appPort = app
-    .get(ConfigService<TConfigs>)
-    .getOrThrow('commonConfig.appPort', { infer: true });
+    .get(ConfigService<Configurations>)
+    .getOrThrow('app.port', { infer: true });
 
   await app.listen(appPort, () => {
     const logger = new Logger('Bootstrap');

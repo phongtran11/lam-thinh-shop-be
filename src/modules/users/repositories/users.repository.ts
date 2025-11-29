@@ -1,11 +1,15 @@
 import { Brackets, DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/modules/users/entities/user.entity';
-import { ROLES } from 'src/shared/constants/role.constant';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { User } from 'src/modules/users/entities';
+import { ROLES } from 'src/shared/constants';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
-  constructor(protected readonly dataSource: DataSource) {
+  constructor(
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+  ) {
     super(User, dataSource.createEntityManager());
   }
 
@@ -34,7 +38,7 @@ export class UsersRepository extends Repository<User> {
       .getOne();
   }
 
-  async findOneWithRolePermissionsById(id: string): Promise<User | null> {
+  async findOneWithRoleById(id: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :id', { id })
@@ -96,5 +100,18 @@ export class UsersRepository extends Repository<User> {
     }
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  async findPermissionNamesByUserId(userId: string): Promise<string[]> {
+    const result = await this.createQueryBuilder('user')
+      .leftJoin('user.role', 'role')
+      .leftJoin('role.rolePermissions', 'rolePermissions')
+      .leftJoin('rolePermissions.permission', 'permission')
+      .where('user.id = :userId', { userId })
+      .andWhere('role.is_active = :isActive', { isActive: true })
+      .andWhere('permission.is_active = :isActive', { isActive: true })
+      .select('permission.name', 'name')
+      .getRawMany<{ name: string }>();
+    return result.map((row) => row.name);
   }
 }
