@@ -31,8 +31,17 @@ export const ApiResponseOkCustom = <T extends Type<any>>(
             ? {
                 properties: {
                   data: {
-                    type: 'array',
-                    items: { $ref: getSchemaPath(data) },
+                    type: 'object',
+                    properties: {
+                      items: {
+                        type: 'array',
+                        items: { $ref: getSchemaPath(data) },
+                      },
+                      page: { type: 'number', example: 1 },
+                      limit: { type: 'number', example: 10 },
+                      totalItem: { type: 'number', example: 100 },
+                      totalPage: { type: 'number', example: 10 },
+                    },
                   },
                 },
               }
