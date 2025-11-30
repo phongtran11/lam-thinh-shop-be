@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User } from 'src/modules/users';
+import { JwtPayload } from 'src/modules/auth';
 import { UsersRepository } from 'src/modules/users/repositories';
 import { Permissions } from 'src/shared/constants';
 import { PERMISSIONS_KEY } from 'src/shared/decorators';
@@ -30,14 +30,14 @@ export class PermissionsGuard implements CanActivate {
       return true; // No permission restriction
     }
 
-    const { user }: { user: User } = context.switchToHttp().getRequest();
+    const { user }: { user: JwtPayload } = context.switchToHttp().getRequest();
 
     if (!user) {
       throw new HTTPForbiddenException('User not authenticated');
     }
 
     const userPermissionNames =
-      await this.usersRepository.findPermissionNamesByUserId(user.id);
+      await this.usersRepository.findPermissionNamesByUserId(user.sub);
 
     const hasAllPermissions = requiredPermissions.every((permission) =>
       userPermissionNames.includes(permission),
