@@ -8,22 +8,25 @@ export class PaginationResponseDto {
   @ApiProperty({
     example: 1,
   })
-  @Type(() => Number)
-  page: number = 1;
+  page: number;
 
   @Expose()
   @ApiProperty({
     example: 10,
   })
-  @Type(() => Number)
-  limit: number = 10;
+  limit: number;
 
   @Expose()
   @ApiProperty({
     example: 100,
   })
-  @Type(() => Number)
-  totalItem: number = 0;
+  totalItem: number;
+
+  @Expose()
+  @ApiProperty({
+    example: 10,
+  })
+  totalPage: number;
 }
 
 export class PaginationRequestDto {
@@ -36,6 +39,7 @@ export class PaginationRequestDto {
   @IsOptional()
   @IsNumber()
   @Min(1)
+  @Expose()
   page: number = 1;
 
   @ApiProperty({
@@ -47,9 +51,22 @@ export class PaginationRequestDto {
   @IsOptional()
   @IsNumber()
   @Min(1)
+  @Expose()
   limit: number = 10;
 
   get skip(): number {
+    if (this.limit > 100) {
+      return (this.page - 1) * 100;
+    }
+
     return (this.page - 1) * this.limit;
+  }
+
+  get take(): number {
+    if (this.limit > 100) {
+      return 100;
+    }
+
+    return this.limit;
   }
 }

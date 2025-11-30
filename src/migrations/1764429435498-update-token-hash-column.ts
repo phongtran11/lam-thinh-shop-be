@@ -13,9 +13,6 @@ export class UpdateTokenHashColumn1764429435498 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "users" DROP CONSTRAINT "FK_f32b1cb14a9920477bcfd63df2c"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "users" RENAME COLUMN "password_hash" TO "password"`,
-    );
     await queryRunner.query(`ALTER TABLE "roles" DROP COLUMN "level"`);
     await queryRunner.query(
       `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "UQ_a7838d2ba25be1342091b6695f1" UNIQUE ("token_hash")`,
@@ -27,9 +24,6 @@ export class UpdateTokenHashColumn1764429435498 implements MigrationInterface {
       `ALTER TABLE "refresh_tokens" DROP CONSTRAINT "UQ_a7838d2ba25be1342091b6695f1"`,
     );
     await queryRunner.query(`ALTER TABLE "roles" ADD "level" integer NOT NULL`);
-    await queryRunner.query(
-      `ALTER TABLE "users" RENAME COLUMN "password" TO "password_hash"`,
-    );
     await queryRunner.query(
       `ALTER TABLE "users" ADD CONSTRAINT "FK_f32b1cb14a9920477bcfd63df2c" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
