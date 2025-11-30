@@ -2,24 +2,29 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User } from 'src/modules/users/entities/user.entity';
-import { EPermissions } from 'src/shared/constants/permission.constant';
-import { PERMISSIONS_KEY } from 'src/shared/decorators/permissions.decorator';
+import { User } from 'src/modules/users';
+import { UsersRepository } from 'src/modules/users/repositories';
+import { Permissions } from 'src/shared/constants';
+import { PERMISSIONS_KEY } from 'src/shared/decorators';
+import { HTTPForbiddenException } from 'src/shared/exceptions';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   private readonly logger = new Logger(PermissionsGuard.name);
 
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.getAllAndOverride<
-      EPermissions[]
-    >(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredPermissions = this.reflector.getAllAndOverride<Permissions[]>(
+      PERMISSIONS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // No permission restriction
@@ -28,16 +33,18 @@ export class PermissionsGuard implements CanActivate {
     const { user }: { user: User } = context.switchToHttp().getRequest();
 
     if (!user) {
-      throw new ForbiddenException('User not authenticated');
+      throw new HTTPForbiddenException('User not authenticated');
     }
 
-    // Check if user has all required permissions
+    const userPermissionNames =
+      await this.usersRepository.findPermissionNamesByUserId(user.id);
+
     const hasAllPermissions = requiredPermissions.every((permission) =>
-      user.hasPermission(permission),
+      userPermissionNames.includes(permission),
     );
 
     if (!hasAllPermissions) {
-      throw new ForbiddenException(
+      throw new HTTPForbiddenException(
         `User ${user.email} attempted to access resource requiring permissions: ${requiredPermissions.join(', ')}`,
       );
     }

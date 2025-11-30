@@ -5,17 +5,7 @@ export const ROLES = {
   ADMIN: 'ADMIN',
 } as const;
 
-export type ERoles = (typeof ROLES)[keyof typeof ROLES];
-
-export const ROLE_HIERARCHY = {
-  CUSTOMER: 1,
-  STAFF: 2,
-  MANAGER: 3,
-  ADMIN: 4,
-} as const;
-
-export type ERoleHierarchy =
-  (typeof ROLE_HIERARCHY)[keyof typeof ROLE_HIERARCHY];
+export type Roles = (typeof ROLES)[keyof typeof ROLES];
 
 export const ROLE_DESCRIPTION = {
   CUSTOMER: 'Khách hàng - Truy cập cửa hàng trực tuyến',
@@ -24,5 +14,5 @@ export const ROLE_DESCRIPTION = {
   ADMIN: 'Quản trị viên - Quyền truy cập toàn hệ thống',
 } as const;
 
-export type ERoleDescription =
+export type RoleDescription =
   (typeof ROLE_DESCRIPTION)[keyof typeof ROLE_DESCRIPTION];

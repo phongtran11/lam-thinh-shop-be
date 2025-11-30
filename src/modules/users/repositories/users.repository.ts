@@ -1,17 +1,22 @@
-import { Brackets, DataSource } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { User } from 'src/modules/users/entities/user.entity';
-import { ROLES } from 'src/shared/constants/role.constant';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
+import { User } from 'src/modules/users/entities';
+import { ROLES } from 'src/shared/constants';
 
 @Injectable()
-export class UsersRepository extends BaseRepository<User> {
+export class UsersRepository extends Repository<User> {
   constructor(
     @InjectDataSource()
-    protected dataSource: DataSource,
+    protected readonly dataSource: DataSource,
   ) {
-    super(dataSource, User);
+    super(User, dataSource.createEntityManager());
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    return await this.createQueryBuilder('user')
+      .where('user.email = :email', { email })
+      .getExists();
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -33,7 +38,7 @@ export class UsersRepository extends BaseRepository<User> {
       .getOne();
   }
 
-  async findOneWithRolePermissionsById(id: string): Promise<User | null> {
+  async findOneWithRoleById(id: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :id', { id })
@@ -71,9 +76,9 @@ export class UsersRepository extends BaseRepository<User> {
     take: number,
     keywords?: string,
   ): Promise<[User[], number]> {
-    const qb = this.createQueryBuilder('user')
-      .leftJoin('user.role', 'role')
-      .where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
+    const qb = this.createQueryBuilder('user').leftJoin('user.role', 'role');
+
+    qb.where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
 
     if (keywords) {
       qb.andWhere(
@@ -95,5 +100,18 @@ export class UsersRepository extends BaseRepository<User> {
     }
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  async findPermissionNamesByUserId(userId: string): Promise<string[]> {
+    const result = await this.createQueryBuilder('user')
+      .leftJoin('user.role', 'role')
+      .leftJoin('role.rolePermissions', 'rolePermissions')
+      .leftJoin('rolePermissions.permission', 'permission')
+      .where('user.id = :userId', { userId })
+      .andWhere('role.is_active = :isActive', { isActive: true })
+      .andWhere('permission.is_active = :isActive', { isActive: true })
+      .select('permission.name', 'name')
+      .getRawMany<{ name: string }>();
+    return result.map((row) => row.name);
   }
 }

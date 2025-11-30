@@ -1,17 +1,16 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { ERoles } from 'src/shared/constants/role.constant';
-import { BaseRepository } from 'src/shared/repositories/base.repository';
+import { Roles } from 'src/shared/constants/role.constant';
 import { Role } from '../entities/role.entity';
 
 @Injectable()
-export class RoleRepository extends BaseRepository<Role> {
+export class RoleRepository extends Repository<Role> {
   constructor(
     @InjectDataSource()
     protected dataSource: DataSource,
   ) {
-    super(dataSource, Role);
+    super(Role, dataSource.createEntityManager());
   }
 
   async findAll(): Promise<Role[]> {
@@ -42,7 +41,7 @@ export class RoleRepository extends BaseRepository<Role> {
       .getOne();
   }
 
-  async findOneByName(name: ERoles): Promise<Role | null> {
+  async findOneByName(name: Roles): Promise<Role | null> {
     return await this.createQueryBuilder('role')
       .where('role.name = :name', { name })
       .andWhere('role.isActive = :isActive', { isActive: true })

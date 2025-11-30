@@ -1,11 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import {
-  ApiBadRequestResponseCustom,
-  ApiResponseCustom,
-} from 'src/shared/decorators/swagger.decorator';
-import { ListUserDto, ListUserQueryParamsDto } from '../dtos/list-user.dto';
-import { UsersService } from '../services/users.service';
+import { UsersService } from 'src/modules/users/services';
+import { ApiBadRequestResponseCustom } from 'src/shared/decorators';
 
 @ApiTags('Users')
 @Controller('users')
@@ -13,10 +9,4 @@ import { UsersService } from '../services/users.service';
 @ApiUnauthorizedResponse()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Get()
-  @ApiResponseCustom(ListUserDto)
-  listUsers(@Query() query: ListUserQueryParamsDto) {
-    return this.usersService.listUsers(query);
-  }
 }

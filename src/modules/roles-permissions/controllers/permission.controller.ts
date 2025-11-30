@@ -6,7 +6,7 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import {
   ApiBadRequestResponseCustom,
   ApiInternalServerErrorResponseCustom,
-  ApiResponseCustom,
+  ApiResponseOkCustom,
 } from 'src/shared/decorators/swagger.decorator';
 
 @ApiTags('Permissions')
@@ -18,7 +18,7 @@ export class PermissionsController {
 
   @Get()
   @Public()
-  @ApiResponseCustom(PermissionDto, {
+  @ApiResponseOkCustom(PermissionDto, {
     isArray: true,
   })
   async getPermissions(): Promise<PermissionDto[]> {

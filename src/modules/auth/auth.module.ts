@@ -5,12 +5,13 @@ import { AuthController } from 'src/modules/auth/controllers/auth.controller';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
 import { AuthService } from 'src/modules/auth/services/auth.service';
+import { LoginTransaction } from 'src/modules/auth/transactions/login.transaction';
 import { RefreshTokenTransaction } from 'src/modules/auth/transactions/refresh-token.transaction';
 import { RegisterTransaction } from 'src/modules/auth/transactions/register.transaction';
 import { UsersModule } from 'src/modules/users/users.module';
 import { SharedModule } from 'src/shared/shared.module';
 import { JwtStrategy } from 'src/shared/strategies/jwt.strategy';
-import { LocalStrategy } from 'src/shared/strategies/local.strategy';
+import { RoleRepository } from '../roles-permissions/repositories/role.repository';
 
 @Module({
   imports: [
@@ -23,16 +24,12 @@ import { LocalStrategy } from 'src/shared/strategies/local.strategy';
   providers: [
     AuthService,
     JwtStrategy,
-    LocalStrategy,
     RefreshTokensRepository,
+    RoleRepository,
     RegisterTransaction,
+    LoginTransaction,
     RefreshTokenTransaction,
   ],
-  exports: [
-    AuthService,
-    RefreshTokensRepository,
-    RegisterTransaction,
-    RefreshTokenTransaction,
-  ],
+  exports: [AuthService, RefreshTokensRepository],
 })
 export class AuthModule {}

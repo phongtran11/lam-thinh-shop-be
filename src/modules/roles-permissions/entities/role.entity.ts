@@ -2,10 +2,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { Permission } from 'src/modules/roles-permissions/entities/permission.entity';
 import { RolePermissions } from 'src/modules/roles-permissions/entities/role-permissions.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import {
-  type ERoleHierarchy,
-  type ERoles,
-} from 'src/shared/constants/role.constant';
+import { type Roles } from 'src/shared/constants/role.constant';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 
 @Entity('roles')
@@ -16,7 +13,7 @@ export class Role extends BaseEntity {
     unique: true,
     comment: 'Role identifier',
   })
-  name: ERoles;
+  name: Roles;
 
   @Column({
     name: 'display_name',
@@ -42,9 +39,6 @@ export class Role extends BaseEntity {
   })
   isActive: boolean;
 
-  @Column({ type: 'int', comment: 'Role hierarchy level' })
-  level: ERoleHierarchy;
-
   // Relations
   @OneToMany(() => User, (user) => user.role)
   users: User[];
@@ -52,6 +46,7 @@ export class Role extends BaseEntity {
   @OneToMany(() => RolePermissions, (rolePermissions) => rolePermissions.role)
   rolePermissions: RolePermissions[];
 
+  // Getter
   get permissions(): Permission[] {
     return this.rolePermissions?.map((rp) => rp.permission) || [];
   }
