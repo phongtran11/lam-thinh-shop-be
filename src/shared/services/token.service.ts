@@ -29,17 +29,14 @@ export class TokenService {
   }
 
   generateAccessToken(payload: JwtPayload): Promise<string> {
-    return this.jwtService.signAsync(
-      { payload },
-      {
-        secret: this.configService.getOrThrow('jwt.accessToken.secret', {
-          infer: true,
-        }),
-        expiresIn: this.configService.getOrThrow('jwt.accessToken.expiration', {
-          infer: true,
-        }),
-      },
-    );
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.getOrThrow('jwt.accessToken.secret', {
+        infer: true,
+      }),
+      expiresIn: this.configService.getOrThrow('jwt.accessToken.expiration', {
+        infer: true,
+      }),
+    });
   }
 
   generateRefreshToken(payload: JwtPayload): Promise<string> {

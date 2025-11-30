@@ -1,8 +1,7 @@
-import { Brackets, DataSource, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { User } from 'src/modules/users/entities';
-import { ROLES } from 'src/shared/constants';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
@@ -43,63 +42,6 @@ export class UsersRepository extends Repository<User> {
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :id', { id })
       .getOne();
-  }
-
-  async findOneWithRolePermissionById(id: string): Promise<User | null> {
-    return await this.createQueryBuilder('user')
-      .leftJoinAndSelect('user.role', 'role', 'role.is_active = :isActive', {
-        isActive: true,
-      })
-      .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
-      .leftJoinAndSelect(
-        'rolePermissions.permission',
-        'permission',
-        'permission.is_active = :isActive',
-        { isActive: true },
-      )
-      .where('user.id = :id', { id })
-      .getOne();
-  }
-
-  async findUsersByCondition(
-    skip: number,
-    take: number,
-  ): Promise<[User[], number]> {
-    return await this.createQueryBuilder('user')
-      .skip(skip)
-      .take(take)
-      .getManyAndCount();
-  }
-
-  async findCustomersByCondition(
-    skip: number,
-    take: number,
-    keywords?: string,
-  ): Promise<[User[], number]> {
-    const qb = this.createQueryBuilder('user').leftJoin('user.role', 'role');
-
-    qb.where('role.name = :customerRole', { customerRole: ROLES.CUSTOMER });
-
-    if (keywords) {
-      qb.andWhere(
-        new Brackets((qb) => {
-          qb.where('LOWER(user.firstName) LIKE LOWER(:keywords)', {
-            keywords: `%${keywords}%`,
-          })
-            .orWhere('LOWER(user.lastName) LIKE LOWER(:keywords)', {
-              keywords: `%${keywords}%`,
-            })
-            .orWhere('LOWER(user.email) LIKE LOWER(:keywords)', {
-              keywords: `%${keywords}%`,
-            })
-            .orWhere('user.phoneNumber LIKE :keywords', {
-              keywords: `%${keywords}%`,
-            });
-        }),
-      );
-    }
-
-    return qb.skip(skip).take(take).getManyAndCount();
   }
 
   async findPermissionNamesByUserId(userId: string): Promise<string[]> {

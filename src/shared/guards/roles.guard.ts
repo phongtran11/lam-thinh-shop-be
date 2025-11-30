@@ -5,8 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtPayload } from 'src/modules/auth';
 import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
-import { User } from 'src/modules/users/entities/user.entity';
 import { Roles } from 'src/shared/constants/role.constant';
 import { ROLES_KEY } from 'src/shared/decorators/roles.decorator';
 import { HTTPForbiddenException } from 'src/shared/exceptions';
@@ -30,13 +30,13 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user }: { user: User } = context.switchToHttp().getRequest();
+    const { user }: { user: JwtPayload } = context.switchToHttp().getRequest();
 
     if (!user) {
       throw new HTTPForbiddenException('User not authenticated');
     }
 
-    const role = await this.roleRepository.findRoleByUserId(user.id);
+    const role = await this.roleRepository.findRoleByUserId(user.sub);
 
     if (!role) {
       throw new HTTPForbiddenException(`Role not found for user ${user.email}`);
