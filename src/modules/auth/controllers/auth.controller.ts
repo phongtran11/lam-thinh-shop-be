@@ -1,10 +1,5 @@
 import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
-import { LoginDto } from 'src/modules/auth/dto/login.dto';
-import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
-import { RefreshTokenRequestDto } from 'src/modules/auth/dto/refresh-token.dto';
-import { RegisterDto } from 'src/modules/auth/dto/register.dto';
-import { AuthService } from 'src/modules/auth/services/auth.service';
 import { Public } from 'src/shared/decorators/public.decorator';
 import {
   ApiBadRequestResponseCustom,
@@ -12,7 +7,12 @@ import {
   ApiResponseOkCustom,
   ApiUnauthorizedResponseCustom,
 } from 'src/shared/decorators/swagger.decorator';
-import { AuthResDto } from '../dto/auth.dto';
+import { AuthResDto } from '../dtos/auth.dto';
+import { LoginDto } from '../dtos/login.dto';
+import { LogoutDto } from '../dtos/logout.dto';
+import { RefreshTokenRequestDto } from '../dtos/refresh-token.dto';
+import { RegisterDto } from '../dtos/register.dto';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 @ApiTags('Auth')

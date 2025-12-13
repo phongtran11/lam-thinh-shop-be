@@ -1,16 +1,23 @@
-import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { RefreshToken } from 'src/modules/auth/entities/';
-import { Role } from 'src/modules/roles-permissions/entities/role.entity';
-import { Permissions } from 'src/shared/constants';
-import { BaseEntity } from 'src/shared/entities';
+import {
+  Entity,
+  Unique,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { Permissions } from 'src/modules/permissions/types/permission.type';
+import { Role } from 'src/modules/roles/entities/role.entity';
+import { BaseEntity } from 'src/shared/entities/base.entity';
 
 @Entity({ name: 'users' })
+@Unique(['email'])
 export class User extends BaseEntity {
   @Column({
     name: 'email',
     type: 'varchar',
     length: 255,
-    unique: true,
     comment: 'The email of the user',
   })
   email: string;
@@ -78,7 +85,6 @@ export class User extends BaseEntity {
     return `${this.firstName || ''} ${this.lastName || ''}`.trim();
   }
 
-  // Methods
   hasPermission(permission: Permissions): boolean {
     return this.role?.permissions?.some((p) => p.name === permission) || false;
   }

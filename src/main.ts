@@ -3,19 +3,18 @@ import helmet from 'helmet';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from 'src/app.module';
-import {
-  Configurations,
-  HttpExceptionFilter,
-  GlobalResponseInterceptor,
-} from 'src/shared';
+import { Configurations } from './shared/configs';
+import { HttpExceptionFilter } from './shared/filters/http-exceptions';
+import { GlobalResponseInterceptor } from './shared/interceptors/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
-
+  app.set('query parser', 'extended');
   app.use(helmet());
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());

@@ -1,25 +1,22 @@
 import { In } from 'typeorm';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RefreshTokensRepository } from './modules/auth';
-import { Permission } from './modules/roles-permissions/entities/permission.entity';
-import { Role } from './modules/roles-permissions/entities/role.entity';
+import { RefreshTokensRepository } from './modules/auth/repositories/refresh-token.repository';
+import { INIT_PERMISSIONS } from './modules/permissions/constants/permission-list.constant';
+import { PERMISSIONS } from './modules/permissions/constants/permission.constant';
+import { PermissionRepository } from './modules/permissions/repositories/permission.repository';
+import { Permissions } from './modules/permissions/types/permission.type';
 import {
-  PermissionRepository,
-  RoleRepository,
-  RolePermissionsRepository,
-} from './modules/roles-permissions/repositories';
+  ROLES,
+  ROLE_DESCRIPTION,
+} from './modules/roles/constants/role.constant';
+import { Role } from './modules/roles/entities/role.entity';
+import { RolePermissionsRepository } from './modules/roles/repositories/role-permissions.repository';
+import { RoleRepository } from './modules/roles/repositories/role.repository';
+import { Roles } from './modules/roles/types/role.type';
 import { User } from './modules/users/entities/user.entity';
 import { UsersRepository } from './modules/users/repositories/users.repository';
-import {
-  Roles,
-  ROLES,
-  Permissions,
-  ROLE_DESCRIPTION,
-  PERMISSIONS,
-  RESOURCES,
-  EncryptionService,
-} from './shared';
+import { hashString } from './shared/helpers/hash.helper';
 
 const initUsers: Array<Partial<User> & { roleName: Roles }> = [
   {
@@ -358,129 +355,6 @@ const initRoles: Array<Partial<Role> & { permissionNames: Permissions[] }> = [
   },
 ];
 
-const initPermissions: Array<Partial<Permission>> = [
-  {
-    name: PERMISSIONS.USERS_READ,
-    displayName: 'Read Users',
-    description: 'Permission to read user information',
-    resource: RESOURCES.USERS,
-  },
-  {
-    name: PERMISSIONS.USERS_CREATE,
-    displayName: 'Create Users',
-    description: 'Permission to create new users',
-    resource: RESOURCES.USERS,
-  },
-  {
-    name: PERMISSIONS.USERS_UPDATE,
-    displayName: 'Update Users',
-    description: 'Permission to update user information',
-    resource: RESOURCES.USERS,
-  },
-  {
-    name: PERMISSIONS.USERS_DELETE,
-    displayName: 'Delete Users',
-    description: 'Permission to delete users',
-    resource: RESOURCES.USERS,
-  },
-  {
-    name: PERMISSIONS.PRODUCTS_READ,
-    displayName: 'Read Products',
-    description: 'Permission to read product information',
-    resource: RESOURCES.PRODUCTS,
-  },
-  {
-    name: PERMISSIONS.PRODUCTS_CREATE,
-    displayName: 'Create Products',
-    description: 'Permission to create new products',
-    resource: RESOURCES.PRODUCTS,
-  },
-  {
-    name: PERMISSIONS.PRODUCTS_UPDATE,
-    displayName: 'Update Products',
-    description: 'Permission to update product information',
-    resource: RESOURCES.PRODUCTS,
-  },
-  {
-    name: PERMISSIONS.PRODUCTS_DELETE,
-    displayName: 'Delete Products',
-    description: 'Permission to delete products',
-    resource: RESOURCES.PRODUCTS,
-  },
-  {
-    name: PERMISSIONS.CATEGORIES_READ,
-    displayName: 'Read Categories',
-    description: 'Permission to read category information',
-    resource: RESOURCES.CATEGORIES,
-  },
-  {
-    name: PERMISSIONS.CATEGORIES_CREATE,
-    displayName: 'Create Categories',
-    description: 'Permission to create new categories',
-    resource: RESOURCES.CATEGORIES,
-  },
-  {
-    name: PERMISSIONS.CATEGORIES_UPDATE,
-    displayName: 'Update Categories',
-    description: 'Permission to update category information',
-    resource: RESOURCES.CATEGORIES,
-  },
-  {
-    name: PERMISSIONS.CATEGORIES_DELETE,
-    displayName: 'Delete Categories',
-    description: 'Permission to delete categories',
-    resource: RESOURCES.CATEGORIES,
-  },
-  {
-    name: PERMISSIONS.ROLES_READ,
-    displayName: 'Read Roles',
-    description: 'Permission to read role information',
-    resource: RESOURCES.ROLES,
-  },
-  {
-    name: PERMISSIONS.ROLES_CREATE,
-    displayName: 'Create Roles',
-    description: 'Permission to create new roles',
-    resource: RESOURCES.ROLES,
-  },
-  {
-    name: PERMISSIONS.ROLES_UPDATE,
-    displayName: 'Update Roles',
-    description: 'Permission to update role information',
-    resource: RESOURCES.ROLES,
-  },
-  {
-    name: PERMISSIONS.ROLES_DELETE,
-    displayName: 'Delete Roles',
-    description: 'Permission to delete roles',
-    resource: RESOURCES.ROLES,
-  },
-  {
-    name: PERMISSIONS.PERMISSIONS_READ,
-    displayName: 'Read Permissions',
-    description: 'Permission to read permission information',
-    resource: RESOURCES.PERMISSIONS,
-  },
-  {
-    name: PERMISSIONS.PERMISSIONS_CREATE,
-    displayName: 'Create Permissions',
-    description: 'Permission to create new permissions',
-    resource: RESOURCES.PERMISSIONS,
-  },
-  {
-    name: PERMISSIONS.PERMISSIONS_UPDATE,
-    displayName: 'Update Permissions',
-    description: 'Permission to update permission information',
-    resource: RESOURCES.PERMISSIONS,
-  },
-  {
-    name: PERMISSIONS.PERMISSIONS_DELETE,
-    displayName: 'Delete Permissions',
-    description: 'Permission to delete permissions',
-    resource: RESOURCES.PERMISSIONS,
-  },
-];
-
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
 
@@ -488,7 +362,6 @@ async function bootstrap() {
   const roleRepository = app.get(RoleRepository);
   const rolePermissionsRepository = app.get(RolePermissionsRepository);
   const userRepository = app.get(UsersRepository);
-  const encryptionService = app.get(EncryptionService);
   const refreshTokenRepository = app.get(RefreshTokensRepository);
 
   console.log('🌱 Starting database seeding...\n');
@@ -503,13 +376,15 @@ async function bootstrap() {
 
   // Upsert permissions
   console.log('📋 Seeding Permissions...');
-  const permissions = initPermissions.map((permission) =>
+  const permissions = INIT_PERMISSIONS.map((permission) =>
     permissionRepository.create(permission),
   );
 
   await permissionRepository.insert(permissions);
 
-  console.log(`✅ Successfully seeded ${initPermissions.length} permissions\n`);
+  console.log(
+    `✅ Successfully seeded ${INIT_PERMISSIONS.length} permissions\n`,
+  );
 
   // Upsert roles with permissions
   console.log('👥 Seeding ERoles...');
@@ -550,7 +425,7 @@ async function bootstrap() {
       continue;
     }
 
-    const hashedPassword = await encryptionService.hash(userInfo.password!);
+    const hashedPassword = await hashString(userInfo.password!);
     await userRepository.save({ ...userInfo, role, password: hashedPassword });
     console.log(`  ✓ ${userInfo.email} (${roleName})`);
   }

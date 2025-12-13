@@ -1,12 +1,9 @@
-import { LessThan, Repository, UpdateResult } from 'typeorm';
-import { DataSource } from 'typeorm';
+import { LessThan, Repository, UpdateResult, DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import {
-  RefreshTokenRevokeReason,
-  REFRESH_TOKEN_REVOKE_REASON,
-} from 'src/shared/constants/auth.constant';
+import { REFRESH_TOKEN_REVOKE_REASON } from '../constants/refresh-token.dto';
+import { RefreshToken } from '../entities/refresh-token.entity';
+import { RefreshTokenRevokeReason } from '../types/refresh-token.constant';
 
 @Injectable()
 export class RefreshTokensRepository extends Repository<RefreshToken> {
@@ -60,7 +57,7 @@ export class RefreshTokensRepository extends Repository<RefreshToken> {
     reason: RefreshTokenRevokeReason = REFRESH_TOKEN_REVOKE_REASON.MANUAL_REVOKE,
   ): Promise<UpdateResult> {
     return this.update(
-      { id: tokenId },
+      { id: tokenId, isRevoked: false },
       {
         isRevoked: true,
         revokedAt: new Date(),

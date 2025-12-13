@@ -1,35 +1,40 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthController } from 'src/modules/auth/controllers/auth.controller';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
-import { AuthService } from 'src/modules/auth/services/auth.service';
-import { LoginTransaction } from 'src/modules/auth/transactions/login.transaction';
-import { RefreshTokenTransaction } from 'src/modules/auth/transactions/refresh-token.transaction';
-import { RegisterTransaction } from 'src/modules/auth/transactions/register.transaction';
-import { UsersModule } from 'src/modules/users/users.module';
-import { SharedModule } from 'src/shared/shared.module';
-import { JwtStrategy } from 'src/shared/strategies/jwt.strategy';
-import { RoleRepository } from '../roles-permissions/repositories/role.repository';
+import { JwtTokensModule } from 'src/shared/modules/jwt-tokens/jwt-tokens.module';
+import { RolesModule } from '../roles/roles.module';
+import { UsersModule } from '../users/users.module';
+import { AuthController } from './controllers/auth.controller';
+import { RefreshToken } from './entities/refresh-token.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RefreshTokensRepository } from './repositories/refresh-token.repository';
+import { AuthService } from './services/auth.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { LoginTransaction } from './transactions/login.transaction';
+import { RefreshTokenTransaction } from './transactions/refresh-token.transaction';
+import { RegisterTransaction } from './transactions/register.transaction';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     UsersModule,
+    RolesModule,
     PassportModule,
-    SharedModule,
+    JwtTokensModule,
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     JwtStrategy,
     RefreshTokensRepository,
-    RoleRepository,
     RegisterTransaction,
     LoginTransaction,
     RefreshTokenTransaction,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
-  exports: [AuthService, RefreshTokensRepository],
 })
 export class AuthModule {}

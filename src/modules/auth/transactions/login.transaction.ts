@@ -1,15 +1,17 @@
 import { DataSource } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { JwtPayload } from 'src/shared/modules/jwt-tokens/jwt-tokens.dto';
 import { BaseTransaction } from 'src/shared/providers/transaction.provider';
+import { RefreshToken } from '../entities/refresh-token.entity';
+import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
 
 @Injectable()
 export class LoginTransaction extends BaseTransaction {
   constructor(
     @InjectDataSource()
     protected readonly dataSource: DataSource,
+    protected readonly refreshTokensRepo: RefreshTokensRepository,
   ) {
     super(dataSource);
   }
@@ -17,22 +19,33 @@ export class LoginTransaction extends BaseTransaction {
   /**
    * Login transaction
    * - Insert new refresh token
-   * - Handle duplicate key errors gracefully
+   * - Return refresh token
+   * - Throws BadRequestException if insert fails
    */
   async execute(
     jwtPayload: JwtPayload,
     refreshTokenHash: string,
     expiresAt: Date,
-  ): Promise<void> {
+  ): Promise<RefreshToken> {
     return this.transaction(async (entityManager) => {
-      const refreshTokensRepository = entityManager.getRepository(RefreshToken);
+      const refreshTokenRepo = entityManager.withRepository(
+        this.refreshTokensRepo,
+      );
 
-      await refreshTokensRepository.insert({
+      const refreshToken = refreshTokenRepo.create({
         id: jwtPayload.jti,
         userId: jwtPayload.sub,
         tokenHash: refreshTokenHash,
         expiresAt,
       });
+
+      const result = await refreshTokenRepo.insert(refreshToken);
+
+      if (result.identifiers.length === 0) {
+        throw new BadRequestException('Failed to create refresh token');
+      }
+
+      return refreshToken;
     });
   }
 }
