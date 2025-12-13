@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { UsersService } from 'src/modules/users/services';
-import { ApiBadRequestResponseCustom } from 'src/shared/decorators';
+import { ApiBadRequestResponseCustom } from 'src/shared/decorators/swagger.decorator';
+import { UsersService } from '../services/users.service';
 
 @ApiTags('Users')
 @Controller('users')

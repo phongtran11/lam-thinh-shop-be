@@ -60,10 +60,7 @@ export abstract class BaseTransaction {
       try {
         await this.queryRunner.release();
       } catch (releaseError) {
-        this.logger.error(
-          releaseError,
-          (releaseError as unknown as Error)?.stack,
-        );
+        this.logger.error(releaseError);
       }
     }
   }

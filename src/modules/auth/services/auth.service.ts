@@ -2,29 +2,29 @@ import { plainToInstance } from 'class-transformer';
 import { ClsService } from 'nestjs-cls';
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable, Logger } from '@nestjs/common';
-import { AuthResDto, AuthUserResDto } from 'src/modules/auth/dto/auth.dto';
-import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
-import { LoginDto } from 'src/modules/auth/dto/login.dto';
-import { LogoutDto } from 'src/modules/auth/dto/logout.dto';
-import { RefreshTokenRequestDto } from 'src/modules/auth/dto/refresh-token.dto';
-import { RegisterDto } from 'src/modules/auth/dto/register.dto';
-import { RefreshTokensRepository } from 'src/modules/auth/repositories/refresh-token.repository';
-import { LoginTransaction } from 'src/modules/auth/transactions/login.transaction';
-import { RefreshTokenTransaction } from 'src/modules/auth/transactions/refresh-token.transaction';
-import { RegisterTransaction } from 'src/modules/auth/transactions/register.transaction';
-import { RoleRepository } from 'src/modules/roles-permissions/repositories/role.repository';
+import { ROLES } from 'src/modules/roles/constants/role.constant';
+import { RoleRepository } from 'src/modules/roles/repositories/role.repository';
 import { UserWithRoleDto } from 'src/modules/users/dtos/user.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users.repository';
-import { REFRESH_TOKEN_REVOKE_REASON } from 'src/shared/constants/auth.constant';
 import { CLS_KEY } from 'src/shared/constants/cls.constant';
-import { ROLES } from 'src/shared/constants/role.constant';
 import {
-  HTTPBadRequestException,
-  HTTPConflictException,
   HTTPUnauthorizedException,
-} from 'src/shared/exceptions';
-import { EncryptionService } from 'src/shared/services/encryption.service';
-import { TokenService } from 'src/shared/services/token.service';
+  HTTPConflictException,
+  HTTPBadRequestException,
+} from 'src/shared/exceptions/http-exceptions';
+import { hashString, compareHashString } from 'src/shared/helpers/hash.helper';
+import { JwtPayload } from 'src/shared/modules/jwt-tokens/jwt-tokens.dto';
+import { JwtTokensService } from 'src/shared/modules/jwt-tokens/jwt-tokens.service';
+import { REFRESH_TOKEN_REVOKE_REASON } from '../constants/refresh-token.dto';
+import { AuthResDto, AuthUserResDto } from '../dtos/auth.dto';
+import { LoginDto } from '../dtos/login.dto';
+import { LogoutDto } from '../dtos/logout.dto';
+import { RefreshTokenRequestDto } from '../dtos/refresh-token.dto';
+import { RegisterDto } from '../dtos/register.dto';
+import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
+import { LoginTransaction } from '../transactions/login.transaction';
+import { RefreshTokenTransaction } from '../transactions/refresh-token.transaction';
+import { RegisterTransaction } from '../transactions/register.transaction';
 
 @Injectable()
 export class AuthService {
@@ -33,8 +33,7 @@ export class AuthService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly refreshTokensRepository: RefreshTokensRepository,
-    private readonly encryptionService: EncryptionService,
-    private readonly tokenService: TokenService,
+    private readonly tokenService: JwtTokensService,
     private readonly registerTransaction: RegisterTransaction,
     private readonly loginTransaction: LoginTransaction,
     private readonly refreshTokenTransaction: RefreshTokenTransaction,
@@ -65,9 +64,7 @@ export class AuthService {
 
     // Generate tokens
     const tokens = await this.tokenService.generateTokens(jwtPayload);
-    const refreshTokenHash = await this.encryptionService.hash(
-      tokens.refreshToken,
-    );
+    const refreshTokenHash = await hashString(tokens.refreshToken);
 
     // Save refresh token in transaction to prevent race conditions
     await this.loginTransaction.execute(
@@ -93,10 +90,9 @@ export class AuthService {
     password: string,
   ): Promise<UserWithRoleDto | null> {
     const user = await this.usersRepository.findOneWithRoleByEmail(email);
-
     // Always compare password to prevent timing attacks
-    const isCorrectPassword = await this.encryptionService.compare(
-      user?.password || '',
+    const isCorrectPassword = await compareHashString(
+      user?.password || '$2b$10$invalidsaltstring22charsmin',
       password,
     );
 
@@ -120,9 +116,7 @@ export class AuthService {
       throw new HTTPConflictException('Email is already in use');
     }
 
-    const hashedPassword = await this.encryptionService.hash(
-      registerDto.password,
-    );
+    const hashedPassword = await hashString(registerDto.password);
 
     const customerRole = await this.roleRepository.findOneByName(
       ROLES.CUSTOMER,
@@ -190,9 +184,7 @@ export class AuthService {
     };
 
     const newTokens = await this.tokenService.generateTokens(payload);
-    const refreshTokenHash = await this.encryptionService.hash(
-      newTokens.refreshToken,
-    );
+    const refreshTokenHash = await hashString(newTokens.refreshToken);
     const newRefreshToken = this.refreshTokensRepository.create({
       id: payload.jti,
       userId: user.id,

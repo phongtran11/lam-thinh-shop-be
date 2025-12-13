@@ -1,23 +1,25 @@
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { JwtPayload } from 'src/modules/auth/dto/jwt-payload.dto';
-import { TokenDto } from 'src/modules/auth/dto/token.dto';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { Role } from 'src/modules/roles-permissions/entities/role.entity';
+import { Role } from 'src/modules/roles/entities/role.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { UsersRepository } from 'src/modules/users/repositories/users.repository';
+import { hashString } from 'src/shared/helpers/hash.helper';
+import { JwtPayload } from 'src/shared/modules/jwt-tokens/jwt-tokens.dto';
+import { JwtTokensService } from 'src/shared/modules/jwt-tokens/jwt-tokens.service';
 import { BaseTransaction } from 'src/shared/providers/transaction.provider';
-import { EncryptionService } from 'src/shared/services/encryption.service';
-import { TokenService } from 'src/shared/services/token.service';
+import { TokenDto } from '../dtos/token.dto';
+import { RefreshTokensRepository } from '../repositories/refresh-token.repository';
 
 @Injectable()
 export class RegisterTransaction extends BaseTransaction {
   constructor(
     @InjectDataSource()
     protected readonly dataSource: DataSource,
-    protected readonly tokenService: TokenService,
-    protected readonly encryptionService: EncryptionService,
+    protected readonly tokenService: JwtTokensService,
+    protected readonly userRepo: UsersRepository,
+    protected readonly refreshTokensRepo: RefreshTokensRepository,
   ) {
     super(dataSource);
   }
@@ -25,12 +27,11 @@ export class RegisterTransaction extends BaseTransaction {
   /**
    * Register transaction
    * - Insert new user
-   * - Query role by roleId
-   * - If role not found, throw InternalServerErrorException
-   * - Set role to newUser
    * - Generate tokens
+   * - Hash refresh token
    * - Insert new refresh token
    * - Return tokens
+   * - Throws BadRequestException if insert user or refresh token fails
    */
   async execute(
     newUser: User,
@@ -40,7 +41,11 @@ export class RegisterTransaction extends BaseTransaction {
     user: User;
   }> {
     return this.transaction(async (entityManager) => {
-      await entityManager.getRepository(User).insert(newUser);
+      const userRepo = entityManager.withRepository(this.userRepo);
+      const insertUserResult = await userRepo.insert(newUser);
+      if (insertUserResult.identifiers.length === 0) {
+        throw new BadRequestException('Failed to create new user');
+      }
 
       const jwtPayload: JwtPayload = {
         sub: newUser.id,
@@ -48,40 +53,26 @@ export class RegisterTransaction extends BaseTransaction {
         roleName: customerRole.name,
         jti: uuidv4(),
       };
-
       const tokens = await this.tokenService.generateTokens(jwtPayload);
+      const refreshTokenHash = await hashString(tokens.refreshToken);
 
-      await this.insertRefreshToken(
-        entityManager,
-        tokens,
-        newUser.id,
-        jwtPayload,
+      const refreshTokenRepo = entityManager.withRepository(
+        this.refreshTokensRepo,
       );
+      const insertRefreshTokenResult = await refreshTokenRepo.insert({
+        id: jwtPayload.jti,
+        userId: newUser.id,
+        tokenHash: refreshTokenHash,
+        expiresAt: tokens.refreshTokenExpiresDate,
+      });
+      if (insertRefreshTokenResult.identifiers.length === 0) {
+        throw new BadRequestException('Failed to create refresh token');
+      }
 
       return {
         tokens,
         user: newUser,
       };
-    });
-  }
-
-  async insertRefreshToken(
-    entityManager: EntityManager,
-    tokens: TokenDto,
-    userId: string,
-    jwtPayload: JwtPayload,
-  ): Promise<void> {
-    const refreshTokensRepository = entityManager.getRepository(RefreshToken);
-
-    const refreshTokenHash = await this.encryptionService.hash(
-      tokens.refreshToken,
-    );
-
-    await refreshTokensRepository.insert({
-      id: jwtPayload.jti,
-      userId,
-      tokenHash: refreshTokenHash,
-      expiresAt: tokens.refreshTokenExpiresIn,
     });
   }
 }

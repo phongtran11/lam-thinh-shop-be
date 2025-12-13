@@ -8,50 +8,46 @@ import {
   ApiUnauthorizedResponse,
   ApiExtraModels,
   ApiInternalServerErrorResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
-  BadRequestResponseDto,
-  InternalServerErrorResponseDto,
-  NotFoundResponseDto,
   SuccessResponseDto,
+  BadRequestResponseDto,
   UnauthorizedResponseDto,
-} from 'src/shared/dtos';
+  NotFoundResponseDto,
+  InternalServerErrorResponseDto,
+} from '../dtos/response.dto';
 
-export const ApiResponseOkCustom = <T extends Type<any>>(
-  data: T,
-  options: { isArray?: boolean } = {},
-) => {
+export const ApiQueryCustom = (options: {
+  name: string;
+  type: Type<any>;
+  required?: boolean;
+}) => {
+  return applyDecorators(
+    ApiQuery({
+      name: options.name,
+      type: options.type,
+      explode: true,
+      style: 'deepObject',
+      required: options.required ?? false,
+    }),
+  );
+};
+
+export const ApiResponseOkCustom = <T extends Type<any>>(data: T) => {
   return applyDecorators(
     ApiExtraModels(SuccessResponseDto, data),
     ApiOkResponse({
       schema: {
         allOf: [
           { $ref: getSchemaPath(SuccessResponseDto) },
-          options.isArray
-            ? {
-                properties: {
-                  data: {
-                    type: 'object',
-                    properties: {
-                      items: {
-                        type: 'array',
-                        items: { $ref: getSchemaPath(data) },
-                      },
-                      page: { type: 'number', example: 1 },
-                      limit: { type: 'number', example: 10 },
-                      totalItem: { type: 'number', example: 100 },
-                      totalPage: { type: 'number', example: 10 },
-                    },
-                  },
-                },
-              }
-            : {
-                properties: {
-                  data: {
-                    $ref: getSchemaPath(data),
-                  },
-                },
+          {
+            properties: {
+              data: {
+                $ref: getSchemaPath(data),
               },
+            },
+          },
         ],
       },
     }),
