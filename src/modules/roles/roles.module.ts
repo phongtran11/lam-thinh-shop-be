@@ -8,6 +8,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { RolePermissionsRepository } from './repositories/role-permissions.repository';
 import { RoleRepository } from './repositories/role.repository';
 import { RoleService } from './services/role.service';
+import { UpsertRoleTransaction } from './transactions/upsert-role.transaction';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Role, RolePermissions])],
@@ -16,6 +17,7 @@ import { RoleService } from './services/role.service';
     RoleService,
     RoleRepository,
     RolePermissionsRepository,
+    UpsertRoleTransaction,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
