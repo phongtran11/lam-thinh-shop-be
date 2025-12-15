@@ -29,7 +29,7 @@ export class Role extends BaseEntity {
     nullable: true,
     comment: 'Role description',
   })
-  description: string;
+  description?: string;
 
   @Column({
     name: 'is_active',
