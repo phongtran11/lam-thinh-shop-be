@@ -1,17 +1,14 @@
 import { ClsModule } from 'nestjs-cls';
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthModule } from 'src/modules/auth/auth.module';
-import { RolesPermissionsModule } from 'src/modules/roles-permissions/roles-permissions.module';
-import { SchedulesModule } from 'src/modules/schedules/schedules.module';
-import { UsersModule } from 'src/modules/users/users.module';
-import { DatabaseModule } from 'src/shared/databases/database.module';
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/shared/guards/permissions.guard';
-import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { LogMiddleWare } from 'src/shared/middlewares/log.middleware';
+import { AuthModule } from './modules/auth/auth.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { UserCustomersModule } from './modules/user-customers/user-customers.module';
+import { UsersModule } from './modules/users/users.module';
 import { configurations } from './shared/configs';
+import { DatabaseModule } from './shared/databases/database.module';
+import { LogMiddleWare } from './shared/middlewares/log.middleware';
 
 @Module({
   imports: [
@@ -27,23 +24,10 @@ import { configurations } from './shared/configs';
 
     // MODULES
     AuthModule,
-    RolesPermissionsModule,
+    RolesModule,
+    PermissionsModule,
     UsersModule,
-    SchedulesModule,
-  ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionsGuard,
-    },
+    UserCustomersModule,
   ],
 })
 export class AppModule {

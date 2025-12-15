@@ -66,6 +66,7 @@ export class GlobalResponseInterceptor<T>
 
         // 6. Default wrap
         return {
+          success: true,
           message: 'success',
           data: data as T,
         };

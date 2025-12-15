@@ -1,7 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { User } from 'src/modules/users/entities';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
@@ -26,6 +26,7 @@ export class UsersRepository extends Repository<User> {
 
   async findOneWithRoleByEmail(email: string): Promise<User | null> {
     return await this.createQueryBuilder('user')
+      .select(['user', 'user.password', 'role'])
       .leftJoinAndSelect('user.role', 'role')
       .where('user.email = :email', { email })
       .getOne();
